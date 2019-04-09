@@ -1,8 +1,8 @@
 import ApolloClient from 'apollo-client';
 import { BatchHttpLink } from 'apollo-link-batch-http';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 
-import MobxStore from './mobx/MobxStore';
+import MobxDomainStore from './mobx/MobxDomainStore';
 import DomainGraphql from './DomainGraphql'
 import DomainGraphqlGorm from './DomainGraphqlGorm'
 import DomainStore from './DomainStore'
@@ -11,7 +11,7 @@ import MessageStore from './MessageStore'
 import MobxMessageStore from './mobx/MobxMessageStore';
 import { toFetch } from './ooGrahpqlMobxUtils'
 
-function createApolloClient({ uri, fetch = null }) {
+function createApolloClient({ uri, fetch = null }):ApolloClient<NormalizedCacheObject> {
   //WEB环境用浏览器原生fetch
   const link = new BatchHttpLink(fetch ? { uri, fetch } : { uri });
   const cache = new InMemoryCache();
@@ -25,7 +25,7 @@ export {
   DomainGraphqlGorm,
   MessageStore,
   MobxMessageStore,
-  MobxStore,
+  MobxDomainStore,
   toFetch,
   createApolloClient
 }

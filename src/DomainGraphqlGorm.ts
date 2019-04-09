@@ -18,9 +18,9 @@ class GormGraphql implements DomainGraphql {
   /**
    *
    * @param defaultVariables graphql客户端的默认参数
-   * @param {ApolloClient<NormalizedCacheObject>} client 客户端
+   * @param {ApolloClient<NormalizedCacheObject>} apolloClient 客户端
    */
-  constructor(private defaultVariables: any = {}, private client: ApolloClient<NormalizedCacheObject>) {
+  constructor(public apolloClient: ApolloClient<NormalizedCacheObject>, public defaultVariables: any = {}) {
   }
 
   //fetchPolicy
@@ -29,7 +29,7 @@ class GormGraphql implements DomainGraphql {
     console.debug('Graphql.list', domain, criteria);
     if (typeof criteria !== 'string')
       criteria = JSON.stringify(criteria);
-    return this.client.query<{ [key: string]: ListResult }>({
+    return this.apolloClient.query<{ [key: string]: ListResult }>({
       query: gql`
                 query ${domain}ListQuery($criteria:String){
                   ${domain}List(criteria:$criteria){
@@ -49,7 +49,7 @@ class GormGraphql implements DomainGraphql {
 
   get(domain: string, fields: string, id: string): Promise<any> {
     console.debug('Graphql.get', domain, id);
-    return this.client.query<{ [key: string]: any }>({
+    return this.apolloClient.query<{ [key: string]: any }>({
       query: gql`
                 query ${domain}Get($id:String!){
                   ${domain}(id:$id){
@@ -66,7 +66,7 @@ class GormGraphql implements DomainGraphql {
 
   create(domain, fields, value): Promise<any> {
     console.debug('Graphql.create', domain, value);
-    return this.client.mutate({
+    return this.apolloClient.mutate({
       mutation: gql`
                 mutation ${domain}CreateMutate($${domain}:${upperFirst(domain)}Create){
                   ${domain}Create(${domain}:$${domain}){
@@ -87,7 +87,7 @@ class GormGraphql implements DomainGraphql {
     // todo 但没有version也有缺陷，无法规避本地修改的对象已经被别人修改这种情况，如有类似需求再做优化
     // 其它属性如果传入会导致graphql校验异常
     const { id: removeId, version, ...updateValue } = pureGraphqlObject(value);
-    return this.client.mutate({
+    return this.apolloClient.mutate({
       mutation: gql`
                 mutation ${domain}UpdateMutate($id:String!, $${domain}:${upperFirst(domain)}Update){
                   ${domain}Update(id:$id, ${domain}:$${domain}){
@@ -104,7 +104,7 @@ class GormGraphql implements DomainGraphql {
 
   delete(domain, id): Promise<DeleteResult> {
     console.debug('Graphql.delete', domain, id);
-    return this.client.mutate<{ [key: string]: DeleteResult }>({
+    return this.apolloClient.mutate<{ [key: string]: DeleteResult }>({
       mutation: gql`
                 mutation ${domain}DeleteMutate($id:String!){
                   ${domain}Delete(id:$id){
@@ -154,7 +154,7 @@ class GormGraphql implements DomainGraphql {
   }
 
   getType(type): Promise<any> {
-    return this.client.query({
+    return this.apolloClient.query({
       query: gql`query ${type}TypeQuery($type:String!){
                   __type(name:$type){
                     fields{

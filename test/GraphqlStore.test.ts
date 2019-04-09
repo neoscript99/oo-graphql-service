@@ -4,20 +4,22 @@ import {
   createApolloClient,
   DomainGraphqlGorm,
   DomainGraphql,
-  MobxStore,
+  MobxDomainStore,
   DomainService,
   MessageStore,
   MobxMessageStore
 } from '../src';
+import ApolloClient from 'apollo-client';
+import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 
 const uri = 'http://localhost:8080/graphql';
 const token = 'gorm-dev-token'
 const defaultVariables = { token };
-const apolloClient = createApolloClient({ uri, fetch })
-const domainGraphql: DomainGraphql = new DomainGraphqlGorm(defaultVariables, apolloClient);
+const apolloClient: ApolloClient<NormalizedCacheObject> = createApolloClient({ uri, fetch })
+const domainGraphql: DomainGraphql = new DomainGraphqlGorm(apolloClient, defaultVariables);
 const messageStore: MessageStore = new MobxMessageStore();
-const userService = new DomainService('user', new MobxStore(), messageStore, domainGraphql);
-const deptService = new DomainService('department', new MobxStore(), messageStore, domainGraphql);
+const userService = new DomainService('user', new MobxDomainStore(), messageStore, domainGraphql);
+const deptService = new DomainService('department', new MobxDomainStore(), messageStore, domainGraphql);
 
 describe('GraphqlStore CURD', () => {
   it('user list and get', () => {

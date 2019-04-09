@@ -1,3 +1,6 @@
+import ApolloClient from 'apollo-client';
+import { NormalizedCacheObject } from 'apollo-cache-inmemory';
+
 export declare type ListResult = {
   results: Array<any>
   totalCount: number
@@ -12,6 +15,9 @@ export declare type DeleteResult = {
  * 和后台graphql框架交互的服务接口
  */
 export default interface DomainGraphql {
+  apolloClient: ApolloClient<NormalizedCacheObject>
+  defaultVariables: any
+
   list(domain, fields, criteria): Promise<ListResult>;
 
   get(domain: string, fields: string, id: string): Promise<any>;
