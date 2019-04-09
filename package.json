@@ -1,0 +1,38 @@
+{
+  "name": "oo-graphql-service",
+  "version": "1.0.0",
+  "description": "Object oriented graphql service integrate with mobx or redux.",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "pub": "tsc && npm publish",
+    "test": "jest"
+  },
+  "keywords": [
+    "graphql mobx redux"
+  ],
+  "author": "Neo Wong",
+  "license": "ISC",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "apollo-cache-inmemory": "^1.3.6",
+    "apollo-client": "^2.4.3",
+    "apollo-link": "^1.2.3",
+    "apollo-link-batch-http": "^1.2.3",
+    "graphql": "^14.0.2",
+    "graphql-tag": "^2.10.0",
+    "lodash": "^4.17.11",
+    "mobx": "^5.8.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.11",
+    "@types/lodash": "^4.14.119",
+    "jest": "^24.7.1",
+    "node-fetch": "^2.3.0",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.2.2"
+  }
+}
