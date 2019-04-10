@@ -1,12 +1,11 @@
 import { processCriteriaOrder, processCriteriaPage } from './ooGrahpqlMobxUtils';
 import upperFirst from 'lodash/upperFirst';
-import DomainGraphql,{  ListResult, DeleteResult } from './DomainGraphql';
+import DomainGraphql, { ListResult, DeleteResult, Criteria } from './DomainGraphql';
 import DomainStore, { PageInfo } from './DomainStore';
-import MessageStore, { MessageBody } from './MessageStore';
 
 
 export declare type ListOptions = {
-  criteria?: any
+  criteria?: Criteria
   pageInfo?: PageInfo
   orders?: Array<any>
   isAppend?: boolean
@@ -25,21 +24,19 @@ export default class DomainService {
    * @param graphqlClient
    * @param dependStoreMap 依赖的其它store，格式如下：{aaStore:aa,bbStore:bb}
    */
-  constructor(private domain: string,
-              private store: DomainStore,
-              private messageStore: MessageStore,
+  constructor(public domain: string,
+              public store: DomainStore,
               private graphql: DomainGraphql,
-              private pageSize: number = 10) {
+              pageSize: number = 10) {
     this.fieldsPromise = graphql.getFields(upperFirst(domain))
     this.store.pageInfo = { currentPage: 1, totalCount: -1, isLastPage: false, pageSize };
   }
 
 
-  findFirst(criteria: any = null) {
+  findFirst(criteria: Criteria = null) {
     const pageInfo = { pageSize: 1, currentPage: 1 }
     return this.list({ criteria, pageInfo })
-      .then(data =>
-        data && data.totalCount > 0 && this.changeCurrentItem(data.results[0]))
+      .then(data => data.totalCount > 0 && this.changeCurrentItem(data.results[0]))
   }
 
   /**
@@ -48,11 +45,10 @@ export default class DomainService {
    * @returns {Promise<{client: *, fields?: *}>}
    */
 
-  listAll(criteria: any = null): Promise<void | ListResult> {
+  listAll(criteria: Criteria = null): Promise<ListResult> {
     return this.list({ criteria })
       .then(data => {
-        if (data)
-          this.store.allList = data.results
+        this.store.allList = data.results
         return data
       })
   }
@@ -65,14 +61,13 @@ export default class DomainService {
    * @returns {Promise<{client: *, fields?: *}>}
    */
 
-  list({ criteria = {}, pageInfo = null, orders = this.defaultOrders }: ListOptions): Promise<void | ListResult> {
+  list({ criteria = null, pageInfo = null, orders = this.defaultOrders }: ListOptions): Promise<ListResult> {
     if (pageInfo)
       processCriteriaPage({ criteria, ...pageInfo })
     if (orders && orders.length > 0)
       processCriteriaOrder(criteria, orders)
     //list需等待fieldsPromise执行完成
     return this.fieldsPromise.then(fields => this.graphql.list(this.domain, fields, criteria))
-      .catch(this.messageStore.newGraphqlError)
   }
 
   /**
@@ -90,31 +85,29 @@ export default class DomainService {
    * @returns {Promise<{client: *, fields?: *}>}
    */
 
-  listPage({ isAppend = false, ...rest }): Promise<void | ListResult> {
+  listPage({ isAppend = false, ...rest }: ListOptions): Promise<ListResult> {
     //查询第一页的时候，清空allList
     if (this.store.pageInfo.currentPage === 1)
       this.store.allList = [];
     return this.list({ pageInfo: this.store.pageInfo, ...rest })
       .then(data => {
-        if (data) {
-          const { results, totalCount } = data;
-          this.store.pageList = results;
-          this.store.pageInfo.totalCount = totalCount;
-          this.store.pageInfo.isLastPage = (results.length < this.store.pageInfo.pageSize ||
-            this.store.pageInfo.pageSize * this.store.pageInfo.currentPage >= totalCount)
-          if (isAppend === true)
-            this.store.allList = this.store.allList.concat(results)
-          else
-            this.store.allList = results;
-        }
+        const { results, totalCount } = data;
+        this.store.pageList = results;
+        this.store.pageInfo.totalCount = totalCount;
+        this.store.pageInfo.isLastPage = (results.length < this.store.pageInfo.pageSize ||
+          this.store.pageInfo.pageSize * this.store.pageInfo.currentPage >= totalCount)
+        if (isAppend === true)
+          this.store.allList = this.store.allList.concat(results)
+        else
+          this.store.allList = results;
         return data;
       })
   }
 
 
-  listNextPage(param): Promise<void | ListResult> {
+  listNextPage(param): string | Promise<ListResult> {
     if (this.store.pageInfo.isLastPage)
-      this.messageStore.newMessage(new MessageBody('已经到底了'))
+      return '已经到底了'
     else {
       this.store.pageInfo.currentPage++;
       return this.listPage(param);
@@ -122,7 +115,7 @@ export default class DomainService {
   }
 
 
-  listFirstPage(param): Promise<void | ListResult> {
+  listFirstPage(param): Promise<ListResult> {
     this.store.pageInfo.currentPage = 1;
     return this.listPage(param);
   }
@@ -142,34 +135,24 @@ export default class DomainService {
 
   create(newItem): Promise<any> {
     return this.fieldsPromise.then(fields => this.graphql.create(this.domain, fields, newItem))
-      .then(data => {
-        this.messageStore.newSuccess('保存成功');
-        return this.changeCurrentItem(data);
-      })
-      .catch(this.messageStore.newGraphqlError)
+      .then(data => this.changeCurrentItem(data))
   }
 
 
   update(id, updateItem): Promise<any> {
     return this.fieldsPromise.then(fields => this.graphql.update(this.domain, fields, id, updateItem))
-      .then(data => {
-        this.messageStore.newSuccess('更新成功');
-        return this.changeCurrentItem(data);
-      })
-      .catch(this.messageStore.newGraphqlError)
+      .then(data => this.changeCurrentItem(data))
   }
 
 
   get(id): Promise<any> {
     return this.fieldsPromise.then(fields => this.graphql.get(this.domain, fields, id))
       .then(data => this.changeCurrentItem(data))
-      .catch(this.messageStore.newGraphqlError)
   }
 
 
-  delete(id): Promise<void | DeleteResult> {
+  delete(id): Promise<DeleteResult> {
     return this.graphql.delete(this.domain, id)
-      .catch(this.messageStore.newGraphqlError)
   }
 }
 
