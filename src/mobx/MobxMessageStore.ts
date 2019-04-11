@@ -1,8 +1,21 @@
 import { observable, action } from 'mobx';
-import MessageStore, { MessageBody, MessageListener } from '../MessageStore';
+import GraphqlError from '../GraphqlError';
 
+export class MessageBody {
+  constructor(
+    public text: string,
+    public   type: string = 'info',
+    public duration: number = 1000,
+    public   isOpen: boolean = true,
+    public   createdTime: Date = new Date()) {
+  }
+}
 
-class MobxMessageStore implements MessageStore {
+export interface MessageListener {
+  (message: MessageBody): void;
+}
+
+export default class MobxMessageStore {
   @observable
   message: MessageBody;
   listenerPromise: Promise<Array<MessageListener>>;
@@ -16,8 +29,8 @@ class MobxMessageStore implements MessageStore {
    * 原格式：“Error: GraphQL error: Exception while fetching data (/reserveCreate) : 空余席位不足，请减少席位重试”
    * @param {message,errorCode,locations,errorType,path,extensions} graphqlError
    */
-    //如果加了@action无法捕获异常
-  newGraphqlError = (graphqlError) => {
+  //如果加了@action无法捕获异常
+  newGraphqlError(graphqlError: GraphqlError) {
     const text = graphqlError.message
       .split(':')
       .filter(str =>
@@ -28,12 +41,12 @@ class MobxMessageStore implements MessageStore {
   }
 
   @action
-  newError(text) {
+  newError(text: string): void {
     this.newMessage(new MessageBody(text, 'error', 2000))
   }
 
   @action
-  newSuccess(text) {
+  newSuccess(text: string): void {
     this.newMessage(new MessageBody(text, 'success'))
   }
 
@@ -44,15 +57,14 @@ class MobxMessageStore implements MessageStore {
    * @param isOpened
    */
   @action
-  newMessage(message: MessageBody) {
+  newMessage(message: MessageBody): void {
     this.message = message
     this.listenerPromise.then(messageListeners => messageListeners.forEach(listener => listener(this.message)))
   }
 
   @action
-  closeMessage() {
+  closeMessage(): void {
     this.message = { ...this.message, isOpen: false }
   }
 }
 
-export default MobxMessageStore;

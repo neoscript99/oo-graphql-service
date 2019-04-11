@@ -57,26 +57,32 @@ export function processCriteriaOrder(criteria: Criteria, orders: CriteriaOrder[]
  * 本方法目前支持，后续可加入新的支持：
  *     Taro.request，等同于wx.request
  */
-export function toFetch({ taroRequest, defaultOptions }) {
+interface SomeFetch {
+  (url: string, options: any): Promise<any>
+}
+
+export function toFetch({ taroRequest, defaultOptions }: any): SomeFetch | null {
   if (taroRequest)
-    return (url, { body: data, ...fetchOptions }) => {
+    return (url: string, { body: data, ...fetchOptions }: any) => {
       //Taro.request默认会对res做JSON.parse，但apollo-http-link需要text，也要做一次JSON.parse
       //所以要让微信返回text,需做如下配置：dataType: 'txt', responseType: 'text'
       //dataType	String	否	json	如果设为json，会尝试对返回的数据做一次 JSON.parse
       //responseType	String	否	text	设置响应的数据类型。合法值：text、arraybuffer
       return taroRequest({ url, data, ...defaultOptions, ...fetchOptions, dataType: 'txt', responseType: 'text' })
-        .then((res) => {
+        .then((res: any) => {
           res.text = () => Promise.resolve(res.data)
           return res
         })
     }
+  else
+    return null
 }
 
 /**
  * 删除对象中的部份属性，满足graphql新增、更新字段要求
  * @param obj
  */
-export function pureGraphqlObject(obj) {
+export function pureGraphqlObject(obj: any): any {
   obj.errors = undefined;
   obj.__typename = undefined;
   obj.lastUpdated = undefined;

@@ -4,9 +4,10 @@ import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import gql from 'graphql-tag';
 import upperFirst from 'lodash/upperFirst';
 import { pureGraphqlObject } from './ooGrahpqlMobxUtils';
+import { Entity } from './DomainStore';
 
 declare var JSON: {
-  stringify: (any) => string
+  stringify: (v: any) => string
 };
 
 //排序支持传字段名列表，或者字段名+顺序类型
@@ -37,8 +38,8 @@ export interface Criteria {
   [key: string]: number | any[] | Criteria//嵌套查询
 }
 
-export interface ListResult {
-  results: Array<any>
+export interface ListResult<E extends Entity> {
+  results: Array<E>
   totalCount: number
 }
 
@@ -62,9 +63,9 @@ export default class DomainGraphql {
 
   //fetchPolicy
   //@see https://www.apollographql.com/docs/react/api/react-apollo.html#graphql-config-options-fetchPolicy
-  list(domain: string, fields: string, criteria: Criteria = null): Promise<ListResult> {
+  list(domain: string, fields: string, criteria: Criteria = null): Promise<ListResult<Entity>> {
     console.debug('Graphql.list', domain, criteria);
-    return this.apolloClient.query<{ [key: string]: ListResult }>({
+    return this.apolloClient.query<{ [key: string]: ListResult<Entity> }>({
       query: gql`
                 query ${domain}ListQuery($criteria:String){
                   ${domain}List(criteria:$criteria){
@@ -82,7 +83,7 @@ export default class DomainGraphql {
       .then(data => data.data[`${domain}List`]);
   }
 
-  get(domain: string, fields: string, id: string): Promise<any> {
+  get(domain: string, fields: string, id: string): Promise<Entity> {
     console.debug('Graphql.get', domain, id);
     return this.apolloClient.query<{ [key: string]: any }>({
       query: gql`
@@ -99,9 +100,9 @@ export default class DomainGraphql {
       .then(data => data.data[domain]);
   }
 
-  create(domain, fields, value): Promise<any> {
+  create(domain: string, fields: string, value: Entity): Promise<Entity> {
     console.debug('Graphql.create', domain, value);
-    return this.apolloClient.mutate({
+    return this.apolloClient.mutate<{ [key: string]: Entity }>({
       mutation: gql`
                 mutation ${domain}CreateMutate($${domain}:${upperFirst(domain)}Create){
                   ${domain}Create(${domain}:$${domain}){
@@ -116,13 +117,13 @@ export default class DomainGraphql {
       .then(data => data.data[`${domain}Create`]);
   }
 
-  update(domain, fields, id, value): Promise<any> {
+  update(domain: string, fields: string, id: any, value: Entity): Promise<Entity> {
     console.debug('Graphql.update', domain, id, value);
     // version 被配置为 @JsonIgnoreProperties ，如果传入会导致Null异常
     // todo 但没有version也有缺陷，无法规避本地修改的对象已经被别人修改这种情况，如有类似需求再做优化
     // 其它属性如果传入会导致graphql校验异常
     const { id: removeId, version, ...updateValue } = pureGraphqlObject(value);
-    return this.apolloClient.mutate({
+    return this.apolloClient.mutate<{ [key: string]: Entity }>({
       mutation: gql`
                 mutation ${domain}UpdateMutate($id:String!, $${domain}:${upperFirst(domain)}Update){
                   ${domain}Update(id:$id, ${domain}:$${domain}){
@@ -137,7 +138,7 @@ export default class DomainGraphql {
       .then(data => data.data[`${domain}Update`]);
   }
 
-  delete(domain, id): Promise<DeleteResult> {
+  delete(domain: string, id: any): Promise<DeleteResult> {
     console.debug('Graphql.delete', domain, id);
     return this.apolloClient.mutate<{ [key: string]: DeleteResult }>({
       mutation: gql`
@@ -188,7 +189,7 @@ export default class DomainGraphql {
     return acc.join(',');
   }
 
-  getType(type): Promise<any> {
+  getType(type: string): Promise<any> {
     return this.apolloClient.query({
       query: gql`query ${type}TypeQuery($type:String!){
                   __type(name:$type){

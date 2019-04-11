@@ -6,7 +6,7 @@ import DomainStore, { Entity, PageInfo } from './DomainStore';
 
 export declare type ListOptions = {
   criteria?: Criteria
-  pageInfo?: PageInfo
+  pageInfo?: PageInfo//特殊情况下，可以覆盖store的pageInfo
   orders?: CriteriaOrder[]
   isAppend?: boolean
 }
@@ -45,7 +45,7 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
    * @returns {Promise<{client: *, fields?: *}>}
    */
 
-  listAll(criteria: Criteria = null): Promise<ListResult> {
+  listAll(criteria: Criteria = null): Promise<ListResult<E>> {
     return this.list({ criteria })
       .then(data => {
         this.store.allList = data.results
@@ -61,31 +61,33 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
    * @returns {Promise<{client: *, fields?: *}>}
    */
 
-  list({ criteria = null, pageInfo = null, orders = this.defaultOrders }: ListOptions): Promise<ListResult> {
+  list({ criteria = null, pageInfo = null, orders = this.defaultOrders }: ListOptions): Promise<ListResult<E>> {
     if (pageInfo)
       processCriteriaPage(criteria, pageInfo)
     if (orders && orders.length > 0)
       processCriteriaOrder(criteria, orders)
     //list需等待fieldsPromise执行完成
-    return this.fieldsPromise.then(fields => this.domainGraphql.list(this.domain, fields, criteria))
+    return this.fieldsPromise.then(fields => <Promise<ListResult<E>>>this.domainGraphql.list(this.domain, fields, criteria))
   }
 
   /**
    * 如需默认排序，重载本方法
    * @returns {null}
    */
-  get defaultOrders() {
+  get defaultOrders(): CriteriaOrder[] | null {
     return null;
   }
 
   /**
    * 返回后设置 pageInfo pageList allList
-   * @param isAppend
-   * @param rest
-   * @returns {Promise<{client: *, fields?: *}>}
+   *
+   *
+   * @param {boolean} isAppend
+   * @param {PageInfo} pageInfo 此处传入pageInfo无效，以store.pageInfo为准
+   * @param {{criteria?: Criteria; orders?: CriteriaOrder[]}} rest
+   * @returns {Promise<ListResult>}
    */
-
-  listPage({ isAppend = false, ...rest }: ListOptions): Promise<ListResult> {
+  listPage({ isAppend = false, pageInfo, ...rest }: ListOptions): Promise<ListResult<E>> {
     //查询第一页的时候，清空allList
     if (this.store.pageInfo.currentPage === 1)
       this.store.allList = [];
@@ -105,7 +107,7 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
   }
 
 
-  listNextPage(param): string | Promise<ListResult> {
+  listNextPage(param: ListOptions): string | Promise<ListResult<E>> {
     if (this.store.pageInfo.isLastPage)
       return '已经到底了'
     else {
@@ -115,7 +117,7 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
   }
 
 
-  listFirstPage(param): Promise<ListResult> {
+  listFirstPage(param: ListOptions): Promise<ListResult<E>> {
     this.store.pageInfo.currentPage = 1;
     return this.listPage(param);
   }
@@ -135,19 +137,19 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
 
   create(newItem: E): Promise<E> {
     return this.fieldsPromise.then(fields => this.domainGraphql.create(this.domain, fields, newItem))
-      .then(data => this.changeCurrentItem(data))
+      .then(data => this.changeCurrentItem(<E>data))
   }
 
 
   update(id: any, updateItem: E): Promise<E> {
     return this.fieldsPromise.then(fields => this.domainGraphql.update(this.domain, fields, id, updateItem))
-      .then(data => this.changeCurrentItem(data))
+      .then(data => this.changeCurrentItem(<E>data))
   }
 
 
   get(id: any): Promise<E> {
     return this.fieldsPromise.then(fields => this.domainGraphql.get(this.domain, fields, id))
-      .then(data => this.changeCurrentItem(data))
+      .then(data => this.changeCurrentItem(<E>data))
   }
 
 

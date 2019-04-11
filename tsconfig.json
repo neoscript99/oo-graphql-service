@@ -9,7 +9,10 @@
     ],
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "declaration": true
+    "declaration": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true
   },
   "include": [
     "src/**/*"
