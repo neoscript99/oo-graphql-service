@@ -4,8 +4,7 @@ import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 
 import MobxDomainStore from './mobx/MobxDomainStore';
 import DomainGraphql, { Criteria, CriteriaOrder, DeleteResult, ListResult } from './DomainGraphql'
-import DomainGraphqlGorm from './DomainGraphqlGorm'
-import DomainStore, { Domain } from './DomainStore'
+import DomainStore, { Entity } from './DomainStore'
 import DomainService, { ListOptions } from './DomainService'
 import { toFetch } from './ooGrahpqlMobxUtils'
 
@@ -17,11 +16,10 @@ function createApolloClient({ uri, fetch = null }): ApolloClient<NormalizedCache
 }
 
 export {
-  Domain,
+  Entity,
   DomainGraphql,
   DomainStore,
   DomainService,
-  DomainGraphqlGorm,
   MobxDomainStore,
   ListOptions,
   ListResult,

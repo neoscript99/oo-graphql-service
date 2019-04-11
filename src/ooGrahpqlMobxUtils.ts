@@ -31,16 +31,16 @@ export function processCriteriaOrder(criteria: Criteria, orders: CriteriaOrder[]
       notNestOrders.push(order);
     else {
       //['user.age','desc']=>['user','age']
-      var nestFields = order[0].split('.');
+      let nestFields: string[] = order[0].split('.');
       //order = ['age','desc']
       order[0] = nestFields[nestFields.length - 1];
 
-      var parentParam = criteria;
+      let parentParam = criteria;
       nestFields.slice(0, -1)
         .forEach(field => {
           if (!parentParam[field])
             parentParam[field] = {}
-          parentParam = parentParam[field];
+          parentParam = parentParam[field] as Criteria;
         })
 
       if (parentParam.order)

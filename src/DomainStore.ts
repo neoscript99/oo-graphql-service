@@ -5,18 +5,24 @@ export interface PageInfo {
   isLastPage?: boolean
 }
 
-export interface Domain {
+export interface FieldError {
+  field?: String
+  message?: String
+}
+
+export interface Entity {
   id?: string
   lastUpdated?: Date
   dateCreated?: Date
   version?: number
+  errors?: FieldError[]
 
   [key: string]: any
 }
 
-export default interface DomainStore {
-  currentItem: Domain;
-  allList: Array<Domain>;
-  pageList: Array<Domain>;
+export default interface DomainStore<E extends Entity=Entity> {
+  currentItem: E;
+  allList: E[];
+  pageList: E[];
   pageInfo: PageInfo;
 }

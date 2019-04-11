@@ -1,13 +1,13 @@
 import { processCriteriaOrder, processCriteriaPage } from './ooGrahpqlMobxUtils';
 import upperFirst from 'lodash/upperFirst';
-import DomainGraphql, { ListResult, DeleteResult, Criteria } from './DomainGraphql';
-import DomainStore, { PageInfo } from './DomainStore';
+import DomainGraphql, { ListResult, DeleteResult, Criteria, CriteriaOrder } from './DomainGraphql';
+import DomainStore, { Entity, PageInfo } from './DomainStore';
 
 
 export declare type ListOptions = {
   criteria?: Criteria
   pageInfo?: PageInfo
-  orders?: [string] | [[string, 'asc' | 'desc']]
+  orders?: CriteriaOrder[]
   isAppend?: boolean
 }
 
@@ -15,7 +15,8 @@ export declare type ListOptions = {
  * Mobx Store基类
  * 内部的属性会被JSON.stringify序列化，如果是嵌套结构或大对象，可以用Promise包装，规避序列化
  */
-export default class DomainService<D extends DomainStore> {
+export default class DomainService<D extends DomainStore<E>, E extends Entity=Entity> {
+  public store: D
   private fieldsPromise: Promise<string>
 
   /**
@@ -25,8 +26,9 @@ export default class DomainService<D extends DomainStore> {
    * @param dependStoreMap 依赖的其它store，格式如下：{aaStore:aa,bbStore:bb}
    */
   constructor(public domain: string,
-              public store: D,
+              public storeClass: (new () => D),
               public domainGraphql: DomainGraphql) {
+    this.store = new storeClass()
     this.fieldsPromise = domainGraphql.getFields(upperFirst(domain))
   }
 
@@ -125,31 +127,31 @@ export default class DomainService<D extends DomainStore> {
   }
 
 
-  changeCurrentItem(currentItem): any {
+  changeCurrentItem(currentItem: E): E {
     this.store.currentItem = currentItem;
     return currentItem;
   }
 
 
-  create(newItem): Promise<any> {
+  create(newItem: E): Promise<E> {
     return this.fieldsPromise.then(fields => this.domainGraphql.create(this.domain, fields, newItem))
       .then(data => this.changeCurrentItem(data))
   }
 
 
-  update(id, updateItem): Promise<any> {
+  update(id: any, updateItem: E): Promise<E> {
     return this.fieldsPromise.then(fields => this.domainGraphql.update(this.domain, fields, id, updateItem))
       .then(data => this.changeCurrentItem(data))
   }
 
 
-  get(id): Promise<any> {
+  get(id: any): Promise<E> {
     return this.fieldsPromise.then(fields => this.domainGraphql.get(this.domain, fields, id))
       .then(data => this.changeCurrentItem(data))
   }
 
 
-  delete(id): Promise<DeleteResult> {
+  delete(id: any): Promise<DeleteResult> {
     return this.domainGraphql.delete(this.domain, id)
   }
 }

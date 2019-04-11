@@ -2,11 +2,9 @@ import fetch from 'node-fetch';
 import gql from 'graphql-tag';
 import {
   createApolloClient,
-  DomainGraphqlGorm,
   DomainGraphql,
   MobxDomainStore,
   DomainService,
-  DomainStore,
 } from '../src';
 import ApolloClient from 'apollo-client';
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
@@ -15,11 +13,9 @@ const uri = 'http://localhost:8080/graphql';
 const token = 'gorm-dev-token'
 const defaultVariables = { token };
 const apolloClient: ApolloClient<NormalizedCacheObject> = createApolloClient({ uri, fetch })
-const domainGraphql: DomainGraphql = new DomainGraphqlGorm(apolloClient, defaultVariables);
-const userStore: DomainStore = new MobxDomainStore();
-const deptStore: DomainStore = new MobxDomainStore();
-const userService = new DomainService('user', userStore, domainGraphql);
-const deptService = new DomainService('department', deptStore, domainGraphql);
+const domainGraphql: DomainGraphql = new DomainGraphql(apolloClient, defaultVariables);
+const userService = new DomainService('user', MobxDomainStore, domainGraphql);
+const deptService = new DomainService('department', MobxDomainStore, domainGraphql);
 
 describe('GraphqlStore CURD', () => {
   it('user list and get', () => {

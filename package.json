@@ -1,6 +1,6 @@
 {
   "name": "oo-graphql-service",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Object oriented graphql service integrate with mobx or redux(coming sone).",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -28,7 +28,6 @@
     "apollo-link-batch-http": "^1.2.3",
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.0",
-    "lodash": "^4.17.11",
     "mobx": "^5.8.0"
   },
   "devDependencies": {
