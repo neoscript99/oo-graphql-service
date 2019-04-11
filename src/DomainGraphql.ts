@@ -1,33 +1,40 @@
 import ApolloClient from 'apollo-client';
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 
-export declare type Criteria = {
-  and?: Criteria,
-  or?: Criteria,
-  eq?: [[string, string]],
-  like?: [[string, string]],
-  ilike?: [[string, any]],
-  ge?: [[string, any]],
-  gt?: [[string, any]],
-  le?: [[string, any]],
-  lt?: [[string, any]],
-  between?: [[string, any, any]],
-  eqProperty?: [[string, string]],
-  in?: [[string, [any]]],
-  notIn?: [[string, [any]]],
-  isEmpty?: [[string]],
-  isNotEmpty?: [[string]],
-  isNull?: [[string]],
-  isNotNull?: [[string]],
-  [key: string]: any,
+//排序支持传字段名列表，或者字段名+顺序类型
+export type CriteriaOrder = string | [string, 'asc' | 'desc']
+
+export interface Criteria {
+  and?: Criteria
+  or?: Criteria
+  eq?: [string, any][]
+  like?: [string, any][]
+  ilike?: [string, any][]
+  ge?: [string, any][]
+  gt?: [string, any][]
+  le?: [string, any][]
+  lt?: [string, any][]
+  between?: [[string, any, any]]
+  eqProperty?: [string, string][]
+  in?: [string, any[]][]
+  notIn?: [string, any[]][]
+  isEmpty?: [string][]
+  isNotEmpty?: [string][]
+  isNull?: [string][]
+  isNotNull?: [string][]
+  max?: number
+  offset?: number
+  order?: CriteriaOrder[]
+
+  [key: string]: any
 }
 
-export declare type ListResult = {
+export interface ListResult {
   results: Array<any>
   totalCount: number
 }
 
-export declare type DeleteResult = {
+export interface DeleteResult {
   success: boolean
   error?: string
 }

@@ -7,7 +7,7 @@ import DomainStore, { PageInfo } from './DomainStore';
 export declare type ListOptions = {
   criteria?: Criteria
   pageInfo?: PageInfo
-  orders?: Array<any>
+  orders?: [string] | [[string, 'asc' | 'desc']]
   isAppend?: boolean
 }
 
@@ -15,7 +15,7 @@ export declare type ListOptions = {
  * Mobx Store基类
  * 内部的属性会被JSON.stringify序列化，如果是嵌套结构或大对象，可以用Promise包装，规避序列化
  */
-export default class DomainService {
+export default class DomainService<D extends DomainStore> {
   private fieldsPromise: Promise<string>
 
   /**
@@ -25,11 +25,9 @@ export default class DomainService {
    * @param dependStoreMap 依赖的其它store，格式如下：{aaStore:aa,bbStore:bb}
    */
   constructor(public domain: string,
-              public store: DomainStore,
-              private graphql: DomainGraphql,
-              pageSize: number = 10) {
-    this.fieldsPromise = graphql.getFields(upperFirst(domain))
-    this.store.pageInfo = { currentPage: 1, totalCount: -1, isLastPage: false, pageSize };
+              public store: D,
+              public domainGraphql: DomainGraphql) {
+    this.fieldsPromise = domainGraphql.getFields(upperFirst(domain))
   }
 
 
@@ -63,11 +61,11 @@ export default class DomainService {
 
   list({ criteria = null, pageInfo = null, orders = this.defaultOrders }: ListOptions): Promise<ListResult> {
     if (pageInfo)
-      processCriteriaPage({ criteria, ...pageInfo })
+      processCriteriaPage(criteria, pageInfo)
     if (orders && orders.length > 0)
       processCriteriaOrder(criteria, orders)
     //list需等待fieldsPromise执行完成
-    return this.fieldsPromise.then(fields => this.graphql.list(this.domain, fields, criteria))
+    return this.fieldsPromise.then(fields => this.domainGraphql.list(this.domain, fields, criteria))
   }
 
   /**
@@ -134,25 +132,25 @@ export default class DomainService {
 
 
   create(newItem): Promise<any> {
-    return this.fieldsPromise.then(fields => this.graphql.create(this.domain, fields, newItem))
+    return this.fieldsPromise.then(fields => this.domainGraphql.create(this.domain, fields, newItem))
       .then(data => this.changeCurrentItem(data))
   }
 
 
   update(id, updateItem): Promise<any> {
-    return this.fieldsPromise.then(fields => this.graphql.update(this.domain, fields, id, updateItem))
+    return this.fieldsPromise.then(fields => this.domainGraphql.update(this.domain, fields, id, updateItem))
       .then(data => this.changeCurrentItem(data))
   }
 
 
   get(id): Promise<any> {
-    return this.fieldsPromise.then(fields => this.graphql.get(this.domain, fields, id))
+    return this.fieldsPromise.then(fields => this.domainGraphql.get(this.domain, fields, id))
       .then(data => this.changeCurrentItem(data))
   }
 
 
   delete(id): Promise<DeleteResult> {
-    return this.graphql.delete(this.domain, id)
+    return this.domainGraphql.delete(this.domain, id)
   }
 }
 

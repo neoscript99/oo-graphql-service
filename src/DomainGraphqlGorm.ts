@@ -13,7 +13,7 @@ declare var JSON: {
 /**
  * 和gorm后台框架交互的graphql服务类
  */
-class GormGraphql implements DomainGraphql {
+class DomainGrahpqlGorm implements DomainGraphql {
 
   /**
    *
@@ -177,4 +177,4 @@ class GormGraphql implements DomainGraphql {
   }
 }
 
-export default GormGraphql;
+export default DomainGrahpqlGorm;

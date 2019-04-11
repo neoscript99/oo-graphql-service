@@ -1,7 +1,7 @@
 {
   "name": "oo-graphql-service",
   "version": "1.0.4",
-  "description": "Object oriented graphql service integrate with mobx or redux.",
+  "description": "Object oriented graphql service integrate with mobx or redux(coming sone).",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
@@ -14,6 +14,10 @@
   ],
   "author": "Neo Wong",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neoscript99/oo-graphql-service.git"
+  },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
@@ -30,6 +34,7 @@
   "devDependencies": {
     "@types/jest": "^24.0.11",
     "@types/lodash": "^4.14.119",
+    "@types/node": "^11.13.4",
     "jest": "^24.7.1",
     "node-fetch": "^2.3.0",
     "ts-jest": "^24.0.2",

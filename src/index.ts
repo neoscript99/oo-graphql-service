@@ -3,9 +3,9 @@ import { BatchHttpLink } from 'apollo-link-batch-http';
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 
 import MobxDomainStore from './mobx/MobxDomainStore';
-import DomainGraphql, { Criteria } from './DomainGraphql'
+import DomainGraphql, { Criteria, CriteriaOrder, DeleteResult, ListResult } from './DomainGraphql'
 import DomainGraphqlGorm from './DomainGraphqlGorm'
-import DomainStore from './DomainStore'
+import DomainStore, { Domain } from './DomainStore'
 import DomainService, { ListOptions } from './DomainService'
 import { toFetch } from './ooGrahpqlMobxUtils'
 
@@ -17,13 +17,17 @@ function createApolloClient({ uri, fetch = null }): ApolloClient<NormalizedCache
 }
 
 export {
+  Domain,
   DomainGraphql,
   DomainStore,
   DomainService,
   DomainGraphqlGorm,
   MobxDomainStore,
-  Criteria,
   ListOptions,
+  ListResult,
+  DeleteResult,
+  Criteria,
+  CriteriaOrder,
   toFetch,
   createApolloClient
 }

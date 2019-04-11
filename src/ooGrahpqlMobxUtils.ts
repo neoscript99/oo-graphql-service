@@ -1,4 +1,6 @@
 import isObject from 'lodash/isObject'
+import { Criteria, CriteriaOrder } from './DomainGraphql';
+import { PageInfo } from './DomainStore';
 
 /**
  * 转换为gorm的分页模式
@@ -9,10 +11,10 @@ import isObject from 'lodash/isObject'
  * @see org.grails.datastore.gorm.query.criteria.AbstractDetachedCriteria
  */
 
-export function processCriteriaPage ({ criteria = {}, currentPage, pageSize }: any) {
+export function processCriteriaPage(criteria: Criteria, pageInfo: PageInfo): Criteria {
   //AbstractDetachedCriteria中的分页函数为max和offset
-  criteria.max = pageSize
-  criteria.offset = (currentPage - 1) * pageSize
+  criteria.max = pageInfo.pageSize
+  criteria.offset = (pageInfo.currentPage - 1) * pageInfo.pageSize
   return criteria
 }
 
@@ -22,13 +24,10 @@ export function processCriteriaPage ({ criteria = {}, currentPage, pageSize }: a
  *  processOrderParam({user:{eq:[['name','admin']]}},[['user.age','desc']])=>{user:{eq:[['name','admin']],order:[['age','desc']]}}
  * @param orders
  */
-export function processCriteriaOrder (criteria, orders) {
-  var notNestOrders = [];
-  criteria.order = notNestOrders
-
+export function processCriteriaOrder(criteria: Criteria, orders: CriteriaOrder[]) {
   //嵌套字段的排序criteria
-  orders.forEach(order => {
-    if (order[0].indexOf('.') == -1)
+  criteria.order = orders.reduce((notNestOrders, order) => {
+    if (typeof order === 'string' || order[0].indexOf('.') === -1)
       notNestOrders.push(order);
     else {
       //['user.age','desc']=>['user','age']
@@ -49,7 +48,8 @@ export function processCriteriaOrder (criteria, orders) {
       else
         parentParam.order = [order];
     }
-  })
+    return notNestOrders
+  }, <CriteriaOrder[]>[])
 }
 
 /**
@@ -57,7 +57,7 @@ export function processCriteriaOrder (criteria, orders) {
  * 本方法目前支持，后续可加入新的支持：
  *     Taro.request，等同于wx.request
  */
-export function toFetch ({ taroRequest, defaultOptions }) {
+export function toFetch({ taroRequest, defaultOptions }) {
   if (taroRequest)
     return (url, { body: data, ...fetchOptions }) => {
       //Taro.request默认会对res做JSON.parse，但apollo-http-link需要text，也要做一次JSON.parse
@@ -76,7 +76,7 @@ export function toFetch ({ taroRequest, defaultOptions }) {
  * 删除对象中的部份属性，满足graphql新增、更新字段要求
  * @param obj
  */
-export function pureGraphqlObject (obj) {
+export function pureGraphqlObject(obj) {
   obj.errors = undefined;
   obj.__typename = undefined;
   obj.lastUpdated = undefined;

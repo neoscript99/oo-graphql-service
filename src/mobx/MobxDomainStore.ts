@@ -1,5 +1,5 @@
 import { decorate, observable } from 'mobx';
-import DomainStore, { PageInfo } from '../DomainStore';
+import DomainStore, { Domain, PageInfo } from '../DomainStore';
 
 
 /**
@@ -8,9 +8,11 @@ import DomainStore, { PageInfo } from '../DomainStore';
  */
 class MobxDomainStore implements DomainStore {
   constructor(public pageInfo: PageInfo = null,
-              public currentItem = { id: '' },
-              public allList = [],
-              public pageList = []) {
+              public currentItem: Domain = null,
+              public allList: Domain[] = null,
+              public pageList: Domain[] = null) {
+    if (!pageInfo)
+      this.pageInfo = { currentPage: 1, totalCount: -1, isLastPage: false, pageSize: 10 };
   }
 }
 
