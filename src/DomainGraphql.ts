@@ -38,8 +38,8 @@ export interface Criteria {
   [key: string]: number | any[] | Criteria//嵌套查询
 }
 
-export interface ListResult<E extends Entity> {
-  results: Array<E>
+export interface ListResult {
+  results: Entity[]
   totalCount: number
 }
 
@@ -63,9 +63,9 @@ export default class DomainGraphql {
 
   //fetchPolicy
   //@see https://www.apollographql.com/docs/react/api/react-apollo.html#graphql-config-options-fetchPolicy
-  list(domain: string, fields: string, criteria: Criteria = null): Promise<ListResult<Entity>> {
+  list(domain: string, fields: string, criteria: Criteria = null): Promise<ListResult> {
     console.debug('Graphql.list', domain, criteria);
-    return this.apolloClient.query<{ [key: string]: ListResult<Entity> }>({
+    return this.apolloClient.query<{ [key: string]: ListResult }>({
       query: gql`
                 query ${domain}ListQuery($criteria:String){
                   ${domain}List(criteria:$criteria){

@@ -4,9 +4,9 @@ import DomainGraphql, { ListResult, DeleteResult, Criteria, CriteriaOrder } from
 import DomainStore, { Entity, PageInfo } from './DomainStore';
 
 
-export declare type ListOptions = {
+export interface ListOptions {
   criteria?: Criteria
-  pageInfo?: PageInfo//特殊情况下，可以覆盖store的pageInfo
+  pageInfo?: PageInfo//如果传入，覆盖store的pageInfo
   orders?: CriteriaOrder[]
   isAppend?: boolean
 }
@@ -15,7 +15,7 @@ export declare type ListOptions = {
  * Mobx Store基类
  * 内部的属性会被JSON.stringify序列化，如果是嵌套结构或大对象，可以用Promise包装，规避序列化
  */
-export default class DomainService<D extends DomainStore<E>, E extends Entity=Entity> {
+export default class DomainService<D extends DomainStore> {
   public store: D
   private fieldsPromise: Promise<string>
 
@@ -45,8 +45,8 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
    * @returns {Promise<{client: *, fields?: *}>}
    */
 
-  listAll(criteria: Criteria = null): Promise<ListResult<E>> {
-    return this.list({ criteria })
+  listAll(options: ListOptions): Promise<ListResult> {
+    return this.list(options)
       .then(data => {
         this.store.allList = data.results
         return data
@@ -61,13 +61,13 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
    * @returns {Promise<{client: *, fields?: *}>}
    */
 
-  list({ criteria = null, pageInfo = null, orders = this.defaultOrders }: ListOptions): Promise<ListResult<E>> {
+  list({ criteria = {}, pageInfo = null, orders = this.defaultOrders }: ListOptions): Promise<ListResult> {
     if (pageInfo)
       processCriteriaPage(criteria, pageInfo)
     if (orders && orders.length > 0)
       processCriteriaOrder(criteria, orders)
     //list需等待fieldsPromise执行完成
-    return this.fieldsPromise.then(fields => <Promise<ListResult<E>>>this.domainGraphql.list(this.domain, fields, criteria))
+    return this.fieldsPromise.then(fields => <Promise<ListResult>>this.domainGraphql.list(this.domain, fields, criteria))
   }
 
   /**
@@ -87,8 +87,10 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
    * @param {{criteria?: Criteria; orders?: CriteriaOrder[]}} rest
    * @returns {Promise<ListResult>}
    */
-  listPage({ isAppend = false, pageInfo, ...rest }: ListOptions): Promise<ListResult<E>> {
+  listPage({ isAppend = false, pageInfo, ...rest }: ListOptions): Promise<ListResult> {
     //查询第一页的时候，清空allList
+    if (pageInfo)
+      this.store.pageInfo = pageInfo
     if (this.store.pageInfo.currentPage === 1)
       this.store.allList = [];
     return this.list({ pageInfo: this.store.pageInfo, ...rest })
@@ -107,7 +109,7 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
   }
 
 
-  listNextPage(param: ListOptions): string | Promise<ListResult<E>> {
+  listNextPage(param: ListOptions): string | Promise<ListResult> {
     if (this.store.pageInfo.isLastPage)
       return '已经到底了'
     else {
@@ -117,7 +119,7 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
   }
 
 
-  listFirstPage(param: ListOptions): Promise<ListResult<E>> {
+  listFirstPage(param: ListOptions): Promise<ListResult> {
     this.store.pageInfo.currentPage = 1;
     return this.listPage(param);
   }
@@ -129,27 +131,27 @@ export default class DomainService<D extends DomainStore<E>, E extends Entity=En
   }
 
 
-  changeCurrentItem(currentItem: E): E {
+  changeCurrentItem(currentItem: Entity): Entity {
     this.store.currentItem = currentItem;
     return currentItem;
   }
 
 
-  create(newItem: E): Promise<E> {
+  create(newItem: Entity): Promise<Entity> {
     return this.fieldsPromise.then(fields => this.domainGraphql.create(this.domain, fields, newItem))
-      .then(data => this.changeCurrentItem(<E>data))
+      .then(data => this.changeCurrentItem(<Entity>data))
   }
 
 
-  update(id: any, updateItem: E): Promise<E> {
+  update(id: any, updateItem: Entity): Promise<Entity> {
     return this.fieldsPromise.then(fields => this.domainGraphql.update(this.domain, fields, id, updateItem))
-      .then(data => this.changeCurrentItem(<E>data))
+      .then(data => this.changeCurrentItem(<Entity>data))
   }
 
 
-  get(id: any): Promise<E> {
+  get(id: any): Promise<Entity> {
     return this.fieldsPromise.then(fields => this.domainGraphql.get(this.domain, fields, id))
-      .then(data => this.changeCurrentItem(<E>data))
+      .then(data => this.changeCurrentItem(<Entity>data))
   }
 
 

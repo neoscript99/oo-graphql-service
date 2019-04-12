@@ -20,9 +20,9 @@ export interface Entity {
   [key: string]: any
 }
 
-export default interface DomainStore<E extends Entity=Entity> {
-  currentItem: E;
-  allList: E[];
-  pageList: E[];
+export default interface DomainStore {
+  currentItem: Entity;
+  allList: Entity[];
+  pageList: Entity[];
   pageInfo: PageInfo;
 }
