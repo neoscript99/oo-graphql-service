@@ -22,6 +22,12 @@ describe('pureGraphqlObject', () => {
     processCriteriaOrder(criteria, orders)
     console.debug(criteria)
     expect(criteria)
-      .toEqual({ order: ['aa', ['bb', 'desc']], cc: { order: [['name', 'asc']] } })
+      .toEqual({ order: [['aa', 'asc'], ['bb', 'desc']], cc: { order: [['name', 'asc']] } })
+
+    const criteria2: Criteria = {}
+    processCriteriaOrder(criteria2, ['portal.seq', 'rowOrder'])
+    console.debug(criteria2)
+    expect(criteria2)
+      .toEqual({ order: [['rowOrder', 'asc']], portal: { order: [['seq', 'asc']] } })
   })
 });

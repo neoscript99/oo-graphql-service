@@ -175,15 +175,14 @@ export default class DomainGraphql {
       else
         continue;*/
         nestType = field.type.ofType.name;
-      else if (field.type.kind === 'OBJECT')
+      else if (['INTERFACE', 'OBJECT'].includes(field.type.kind))
         nestType = field.type.name;
 
       if (nestType) {
         let nestFields = await this.getFields(nestType, level + 1, maxLevel);
         if (nestFields)
           acc.push(`${field.name}{${nestFields}}`);
-      }
-      else
+      } else
         acc.push(field.name);
     }
     return acc.join(',');

@@ -27,7 +27,9 @@ export function processCriteriaPage(criteria: Criteria, pageInfo: PageInfo): Cri
 export function processCriteriaOrder(criteria: Criteria, orders: CriteriaOrder[]) {
   //嵌套字段的排序criteria
   criteria.order = orders.reduce((notNestOrders, order) => {
-    if (typeof order === 'string' || order[0].indexOf('.') === -1)
+    if (typeof order === 'string')
+      order = [order, 'asc']
+    if (order[0].indexOf('.') === -1)
       notNestOrders.push(order);
     else {
       //['user.age','desc']=>['user','age']
