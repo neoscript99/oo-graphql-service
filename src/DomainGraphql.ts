@@ -161,8 +161,10 @@ export default class DomainGraphql {
       return null;
     console.debug('Graphql.getFields', typeName);
     let type = await this.getType(typeName);
-    if (!(type && type.data))
+    if (!(type && type.data && type.data.__type)) {
+      console.error(`服务端没有这个Graphql类型：${typeName}`)
       return null;
+    }
     let fields = type.data.__type.fields;
     let acc = [];
     for (let i = 0; i < fields.length; i++) {
