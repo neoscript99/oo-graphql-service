@@ -8,9 +8,9 @@ import DomainStore, { Entity } from './DomainStore'
 import DomainService, { ListOptions } from './DomainService'
 import { toFetch } from './ooGrahpqlMobxUtils'
 
-function createApolloClient(uri: string, fetch: any = null): ApolloClient<NormalizedCacheObject> {
+function createApolloClient(fetchParams: BatchHttpLink.Options): ApolloClient<NormalizedCacheObject> {
   //WEB环境用浏览器原生fetch
-  const link = new BatchHttpLink(fetch ? { uri, fetch } : { uri });
+  const link = new BatchHttpLink(fetchParams);
   const cache = new InMemoryCache();
   return new ApolloClient({ link, cache });
 }
