@@ -1,4 +1,4 @@
-import { processCriteriaOrder, pureGraphqlObject } from '../src/ooGrahpqlMobxUtils';
+import { processCriteriaOrder, pureGraphqlObject } from '../src/utils/graphqlUtil';
 import { Criteria, CriteriaOrder } from '../src/DomainGraphql';
 
 describe('pureGraphqlObject', () => {

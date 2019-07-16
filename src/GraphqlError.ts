@@ -1,4 +1,4 @@
-export default interface GraphqlError{
+export interface GraphqlError{
   message: string
   errorCode: string
   locations: string

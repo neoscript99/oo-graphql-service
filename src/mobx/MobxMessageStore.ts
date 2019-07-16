@@ -1,5 +1,5 @@
 import { observable, action } from 'mobx';
-import GraphqlError from '../GraphqlError';
+import { GraphqlError } from '../';
 
 export class MessageBody {
   constructor(
@@ -15,9 +15,9 @@ export interface MessageListener {
   (message: MessageBody): void;
 }
 
-export default class MobxMessageStore {
+export class MobxMessageStore {
   @observable
-  message: MessageBody;
+  message: MessageBody = new MessageBody('');
   listenerPromise: Promise<Array<MessageListener>>;
 
   constructor(private messageListeners: Array<MessageListener> = []) {

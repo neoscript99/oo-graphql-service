@@ -22,7 +22,7 @@ const portletColRelService = new DomainService('portletColRel', MobxDomainStore,
 describe('GraphqlStore CURD', () => {
   it('user list and get', async () => {
     //嵌套属性排序，目前gorm不支持，可能是用了DetachedCriteria的原因，原来做客户经理考核的时候好像是支持的
-    const data = await userService.listAll({ pageInfo: { pageSize: 2 }, orders: ['dept.seq', 'name'] })
+    const data = await userService.listAll({ pageInfo: { currentPage: 1, pageSize: 2 }, orders: ['dept.seq', 'name'] })
 
     expect(data)
       .not

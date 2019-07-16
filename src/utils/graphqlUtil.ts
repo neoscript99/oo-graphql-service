@@ -1,6 +1,16 @@
 import isObject from 'lodash/isObject'
-import { Criteria, CriteriaOrder } from './DomainGraphql';
-import { PageInfo } from './DomainStore';
+import { Criteria, CriteriaOrder } from '../';
+import { PageInfo } from '../DomainStore';
+import { BatchHttpLink } from 'apollo-link-batch-http';
+import ApolloClient from 'apollo-client';
+import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
+
+export function createApolloClient(fetchParams: BatchHttpLink.Options): ApolloClient<NormalizedCacheObject> {
+  //WEB环境用浏览器原生fetch
+  const link = new BatchHttpLink(fetchParams);
+  const cache = new InMemoryCache();
+  return new ApolloClient({ link, cache });
+}
 
 /**
  * 转换为gorm的分页模式
@@ -92,4 +102,10 @@ export function pureGraphqlObject(obj: any): any {
   Object.values(obj)
     .forEach(value => isObject(value) && pureGraphqlObject(value))
   return obj;
+}
+
+export function clearEntity(entity: any, ...deleteProps: string[]) {
+  const { id, lastUpdated, dateCreated, version, errors, ...rest } = entity;
+  deleteProps.every(prop => delete rest[prop])
+  return rest
 }

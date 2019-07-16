@@ -3,7 +3,7 @@ import ApolloClient from 'apollo-client';
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import gql from 'graphql-tag';
 import upperFirst from 'lodash/upperFirst';
-import { pureGraphqlObject } from './ooGrahpqlMobxUtils';
+import { pureGraphqlObject } from './utils/graphqlUtil';
 import { Entity } from './DomainStore';
 
 declare var JSON: {
@@ -35,7 +35,7 @@ export interface Criteria {
   offset?: number
   order?: CriteriaOrder[]
 
-  [key: string]: number | any[] | Criteria//嵌套查询
+  [key: string]: number | any[] | Criteria | undefined//嵌套查询
 }
 
 export interface ListResult {
@@ -51,7 +51,7 @@ export interface DeleteResult {
 /**
  * 和gorm后台框架交互的graphql服务类
  */
-export default class DomainGraphql {
+export class DomainGraphql {
 
   /**
    *
@@ -63,7 +63,7 @@ export default class DomainGraphql {
 
   //fetchPolicy
   //@see https://www.apollographql.com/docs/react/api/react-apollo.html#graphql-config-options-fetchPolicy
-  list(domain: string, fields: string, criteria: Criteria = null): Promise<ListResult> {
+  list(domain: string, fields: string, criteria: Criteria): Promise<ListResult> {
     console.debug('Graphql.list', domain, criteria);
     return this.apolloClient.query<{ [key: string]: ListResult }>({
       query: gql`
@@ -114,7 +114,7 @@ export default class DomainGraphql {
         ...this.defaultVariables, [domain]: value
       }
     })
-      .then(data => data.data[`${domain}Create`]);
+      .then(data => data.data![`${domain}Create`]);
   }
 
   update(domain: string, fields: string, id: any, value: Entity): Promise<Entity> {
@@ -135,7 +135,7 @@ export default class DomainGraphql {
         ...this.defaultVariables, [domain]: updateValue, id
       }
     })
-      .then(data => data.data[`${domain}Update`]);
+      .then(data => data.data![`${domain}Update`]);
   }
 
   delete(domain: string, id: any): Promise<DeleteResult> {
@@ -153,20 +153,21 @@ export default class DomainGraphql {
         ...this.defaultVariables, id
       }
     })
-      .then(data => data.data[`${domain}Delete`]);
+      .then(data => data.data![`${domain}Delete`]);
   }
 
   async getFields(typeName: string, level: number = 0, maxLevel: number = 6): Promise<string> {
     if (level >= maxLevel)
-      return null;
+      return Promise.resolve('');
+
     console.debug('Graphql.getFields', typeName);
     let type = await this.getType(typeName);
     if (!(type && type.data && type.data.__type)) {
       console.error(`服务端没有这个Graphql类型：${typeName}`)
-      return null;
+      return Promise.reject(`服务端没有这个Graphql类型：${typeName}`);
     }
     let fields = type.data.__type.fields;
-    let acc = [];
+    let acc:string[] = [];
     for (let i = 0; i < fields.length; i++) {
       let field = fields[i];
       let nestType = null;
@@ -182,7 +183,7 @@ export default class DomainGraphql {
 
       if (nestType) {
         let nestFields = await this.getFields(nestType, level + 1, maxLevel);
-        if (nestFields)
+        if (nestFields.length > 0)
           acc.push(`${field.name}{${nestFields}}`);
       } else
         acc.push(field.name);

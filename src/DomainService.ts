@@ -1,7 +1,16 @@
-import { processCriteriaOrder, processCriteriaPage } from './ooGrahpqlMobxUtils';
 import upperFirst from 'lodash/upperFirst';
-import DomainGraphql, { ListResult, DeleteResult, Criteria, CriteriaOrder } from './DomainGraphql';
-import DomainStore, { Entity, PageInfo } from './DomainStore';
+import {
+  ListResult,
+  DeleteResult,
+  Criteria,
+  DomainGraphql,
+  CriteriaOrder,
+  DomainStore,
+  Entity,
+  PageInfo,
+  processCriteriaOrder,
+  processCriteriaPage
+} from './';
 
 
 export interface ListOptions {
@@ -15,7 +24,7 @@ export interface ListOptions {
  * Mobx Store基类
  * 内部的属性会被JSON.stringify序列化，如果是嵌套结构或大对象，可以用Promise包装，规避序列化
  */
-export default class DomainService<D extends DomainStore> {
+export class DomainService<D extends DomainStore> {
   public store: D
   private fieldsPromise: Promise<string>
 
@@ -33,7 +42,7 @@ export default class DomainService<D extends DomainStore> {
   }
 
 
-  findFirst(criteria: Criteria = null) {
+  findFirst(criteria?: Criteria) {
     const pageInfo = { pageSize: 1, currentPage: 1 }
     return this.list({ criteria, pageInfo })
       .then(data => data.totalCount > 0 && this.changeCurrentItem(data.results[0]))
@@ -61,7 +70,7 @@ export default class DomainService<D extends DomainStore> {
    * @returns {Promise<{client: *, fields?: *}>}
    */
 
-  list({ criteria = {}, pageInfo = null, orders = this.defaultOrders }: ListOptions): Promise<ListResult> {
+  list({ criteria = {}, pageInfo, orders = this.defaultOrders }: ListOptions): Promise<ListResult> {
     if (pageInfo)
       processCriteriaPage(criteria, pageInfo)
     if (orders && orders.length > 0)
@@ -74,8 +83,8 @@ export default class DomainService<D extends DomainStore> {
    * 如需默认排序，重载本方法
    * @returns {null}
    */
-  get defaultOrders(): CriteriaOrder[] | null {
-    return null;
+  get defaultOrders(): CriteriaOrder[] {
+    return [];
   }
 
   /**

@@ -1,6 +1,6 @@
 export interface PageInfo {
-  currentPage?: number
-  pageSize?: number
+  currentPage: number
+  pageSize: number
   totalCount?: number
   isLastPage?: boolean
 }
@@ -20,7 +20,7 @@ export interface Entity {
   [key: string]: any
 }
 
-export default interface DomainStore {
+export interface DomainStore {
   currentItem: Entity;
   allList: Entity[];
   pageList: Entity[];
