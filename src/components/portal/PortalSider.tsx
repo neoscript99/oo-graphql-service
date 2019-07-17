@@ -1,7 +1,8 @@
 import React from 'react';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Anchor, Layout } from 'antd';
-import { DomainService, Entity, MobxDomainStore } from '../../';
+import { Entity } from '../../DomainStore';
+import { PortalRequiredServices } from './PortalRequiredServices';
 
 
 const {
@@ -10,17 +11,15 @@ const {
 
 interface P {
   portal: Entity
-  portletColRelService?: DomainService<MobxDomainStore>
-  portalRowRelService?: DomainService<MobxDomainStore>
+  services: PortalRequiredServices
 }
 
-@inject('portalRowRelService', 'portletColRelService')
 @observer
 export class PortalSider extends React.Component<P> {
 
   render() {
-    const { portalRowRelService, portletColRelService } = this.props;
-    if (!portalRowRelService || !portletColRelService || !portalRowRelService.store.allList || !portletColRelService.store.allList)
+    const { portalRowRelService, portletColRelService } = this.props.services;
+    if (!portalRowRelService.store.allList || !portletColRelService.store.allList)
       return null;
 
     const rowRelList = portalRowRelService.store.allList

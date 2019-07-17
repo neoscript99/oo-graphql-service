@@ -1,9 +1,9 @@
 {
   "name": "oo-graphql-service",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Object oriented graphql service integrate with mobx or redux(coming soon).",
   "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "typings": "src/index.d.ts",
   "scripts": {
     "build": "tsc",
     "pub": "tsc && npm publish",
@@ -32,6 +32,7 @@
     "js-sha256": "^0.9.0",
     "mobx": "^5.8.0",
     "mobx-react": "^6.1.1",
+    "moment": "^2.24.0",
     "numeral": "^2.0.6",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

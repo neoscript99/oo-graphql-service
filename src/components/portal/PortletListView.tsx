@@ -1,12 +1,13 @@
 import React from 'react';
 import urlTemplate from 'url-template'
-import { DomainService, Entity, MobxDomainStore,Portlet } from '../../';
 import { Card, Table } from 'antd';
 import { dateStringConvert } from '../../utils/stringUtil';
 import { ColumnProps } from 'antd/lib/table';
-import { inject } from 'mobx-react';
+import { DomainService } from '../../DomainService';
+import { MobxDomainStore } from '../../mobx';
+import { Portlet } from './Portlet';
+import { Entity } from '../../DomainStore';
 
-@inject('portletListViewService')
 export class PortletListView extends Portlet {
   render() {
     if (!(this.state && this.state.portlet))
@@ -62,6 +63,6 @@ export class PortletListView extends Portlet {
   }
 
   get portletService(): DomainService<MobxDomainStore> {
-    return this.props.portletListViewService;
+    return this.props.services.portletListViewService;
   }
 }

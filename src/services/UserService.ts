@@ -1,7 +1,10 @@
-import { Entity, MobxDomainStore, DomainGraphql, DomainService } from '../';
 import gql from 'graphql-tag';
 import { sha256 } from 'js-sha256'
 import { message } from 'antd';
+import { Entity } from '../DomainStore';
+import { DomainService } from '../DomainService';
+import { MobxDomainStore } from '../mobx';
+import { DomainGraphql } from '../DomainGraphql';
 
 export interface LoginInfo {
   success: boolean

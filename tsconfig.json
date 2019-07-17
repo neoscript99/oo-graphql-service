@@ -11,9 +11,10 @@
     "esModuleInterop": true,
     "strict": true,
     "jsx": "react",
-    "declaration": true,
+    "declaration": false,
     "noImplicitAny": false,
     "noImplicitReturns": true,
+    "sourceMap": true,
     "noImplicitThis": true
   },
   "include": [

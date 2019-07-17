@@ -1,7 +1,10 @@
 import React from 'react';
-import { DomainService, MobxDomainStore, Portlet, PortletProps, PortletSwitch } from '../../';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Card, Tabs } from 'antd';
+import { DomainService } from '../../DomainService';
+import { MobxDomainStore } from '../../mobx';
+import { Portlet, PortletProps } from './Portlet';
+import { PortletSwitch } from './PortletSwitch';
 
 
 const { TabPane } = Tabs;
@@ -10,7 +13,6 @@ interface P extends PortletProps {
   portletTabRelService: DomainService<MobxDomainStore>
 }
 
-@inject('portletTabRelService', 'portletDataSourceService')
 @observer
 export class PortletTab extends Portlet {
 
@@ -32,7 +34,7 @@ export class PortletTab extends Portlet {
         <Tabs>
           {portletList.map(ptl => <TabPane tab={ptl.portletName} key={ptl.id}>
             <PortletSwitch key={ptl.id} portlet={ptl} inTab={true}
-                           portletDataSourceService={this.props.portletDataSourceService} />
+                           services={this.props.services} />
           </TabPane>)}
         </Tabs>
       </Card>

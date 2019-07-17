@@ -1,5 +1,5 @@
 export * from './PortalCol'
-export * from './PortalRequriedServices'
+export * from './PortalRequiredServices'
 export * from './PortalRows'
 export * from './PortalSider'
 export * from './Portlet'

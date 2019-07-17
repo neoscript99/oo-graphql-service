@@ -1,9 +1,9 @@
 import React, { ReactNode } from 'react';
-import { DomainService, MobxDomainStore, Portlet } from '../../';
-import { inject } from 'mobx-react';
 import { Button } from 'antd';
+import { DomainService } from '../../DomainService';
+import { MobxDomainStore } from '../../mobx';
+import { Portlet } from './Portlet';
 
-@inject('portletLinkService')
 export class PortletLink extends Portlet {
 
   render(): ReactNode {
@@ -17,7 +17,7 @@ export class PortletLink extends Portlet {
   }
 
   get portletService(): DomainService<MobxDomainStore> {
-    return this.props.portletLinkService;
+    return this.props.services.portletLinkService;
   }
 }
 

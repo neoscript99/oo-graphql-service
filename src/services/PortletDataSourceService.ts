@@ -1,6 +1,8 @@
-import { Entity, MobxDomainStore, DomainService } from '../';
 import gql from 'graphql-tag';
 import { LivebosObject, transLivebosData } from './LivebosServerService';
+import { DomainService } from '../DomainService';
+import { MobxDomainStore } from '../mobx';
+import { Entity } from '../DomainStore';
 
 export interface DataResult {
   //列表结果

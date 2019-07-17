@@ -1,6 +1,11 @@
 import React from 'react';
 import { Card, Icon } from 'antd'
-import { PortletListView, PortletCalendar, PortletTab, PortletLink, PortletTable, PortletProps } from './';
+import { PortletListView } from './PortletListView';
+import { PortletLink } from './PortletLink';
+import { PortletTable } from './PortletTable';
+import { PortletCalendar } from './PortletCalendar';
+import { PortletTab } from './PortletTab';
+import { PortletProps } from './Portlet';
 
 const defaultPortalMap: PortletMap = { PortletLink, PortletTable, PortletListView, PortletCalendar, PortletTab }
 
@@ -22,13 +27,13 @@ export const PortletSwitch = (props: PortletSwitchProps) => {
 }
 
 
-const PortletMapping = ({ portlet, portletMap, inTab, portletDataSourceService }: PortletSwitchProps) => {
+const PortletMapping = ({ portlet, portletMap, inTab, services }: PortletSwitchProps) => {
     const map = { ...defaultPortalMap, ...portletMap };
     if (map[portlet.type]) {
       const Portlet = map[portlet.type];
-      return <Portlet portlet={portlet} inTab={inTab} portletDataSourceService={portletDataSourceService} />
+      return <Portlet portlet={portlet} inTab={inTab} services={services} />
     } else
-      return <NotExists portlet={portlet} portletDataSourceService={portletDataSourceService} />
+      return <NotExists portlet={portlet} services={services} />
   }
 ;
 

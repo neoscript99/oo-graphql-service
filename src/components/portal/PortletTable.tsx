@@ -1,17 +1,11 @@
 import React from 'react';
-import {
-  DomainService,
-  Entity,
-  MobxDomainStore,
-  Portlet,
-  PortletProps,
-  PortletState,
-  commonColumnRenders,
-  commonSortFunctions
-} from '../../';
-import { inject } from 'mobx-react';
 import { Card, Table } from 'antd';
 import { ColumnProps } from 'antd/lib/table';
+import { DomainService } from '../../DomainService';
+import { MobxDomainStore } from '../../mobx';
+import { Portlet, PortletProps, PortletState } from './Portlet';
+import { Entity } from '../../DomainStore';
+import { commonColumnRenders, commonSortFunctions } from '../../utils';
 
 export interface PortletColumnProps extends ColumnProps<Entity> {
   renderFun?: string
@@ -22,7 +16,6 @@ export interface PortletTableState extends PortletState {
   columns: PortletColumnProps[]
 }
 
-@inject('portletTableService')
 export class PortletTable extends Portlet<PortletProps, PortletTableState> {
 
   render() {
@@ -45,6 +38,6 @@ export class PortletTable extends Portlet<PortletProps, PortletTableState> {
   }
 
   get portletService(): DomainService<MobxDomainStore> {
-    return this.props.portletTableService;
+    return this.props.services.portletTableService;
   }
 }

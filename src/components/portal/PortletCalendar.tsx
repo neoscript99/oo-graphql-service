@@ -1,14 +1,14 @@
 import React from 'react';
-import { DomainService, MobxDomainStore, Portlet } from '../../';
-import { inject } from 'mobx-react';
 import { Badge, Calendar, Card, Popover, List, Icon, Divider } from 'antd';
 import urlTemplate from 'url-template'
 import moment, { Moment } from 'moment';
 import 'moment/locale/zh-cn';
+import { DomainService } from '../../DomainService';
+import { MobxDomainStore } from '../../mobx';
+import { Portlet } from './Portlet';
 
 moment.locale('zh-cn');
 
-@inject('portletCalendarService')
 export class PortletCalendar extends Portlet {
 
   render() {
@@ -49,7 +49,7 @@ export class PortletCalendar extends Portlet {
 
 
   get portletService(): DomainService<MobxDomainStore> | null {
-    return this.props.portletCalendarService;
+    return this.props.services.portletCalendarService;
   }
 
   /**

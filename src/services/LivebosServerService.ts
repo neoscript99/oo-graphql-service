@@ -1,5 +1,6 @@
-import { MobxDomainStore, DomainService } from '../';
 import gql from 'graphql-tag';
+import { DomainService } from '../DomainService';
+import { MobxDomainStore } from '../mobx/MobxDomainStore';
 
 //{"id":0,"loginId":"admin","name":"管理员","lastLogin":"2019-06-13 17:46:54","grade":0,"status":1,"orgId":0}
 export interface LiveUserInfo {

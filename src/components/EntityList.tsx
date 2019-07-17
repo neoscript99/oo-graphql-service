@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
-import {MobxDomainStore,DomainService, ListOptions,ListResult,Entity } from '../';
 import { TableProps } from 'antd/lib/table';
 import { getClassName } from '../utils/langUtil';
+import { Entity } from '../DomainStore';
+import { DomainService, ListOptions } from '../DomainService';
+import { MobxDomainStore } from '../mobx';
+import { ListResult } from '../DomainGraphql';
 
 export interface EntityListState {
   tableProps?: TableProps<Entity>

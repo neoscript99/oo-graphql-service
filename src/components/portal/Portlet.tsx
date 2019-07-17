@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
-import { Entity, DomainService, MobxDomainStore } from '../../';
-import { PortletDataSourceService } from '../../services/';
+import { Entity } from '../../DomainStore';
+import { DomainService } from '../../DomainService';
+import { MobxDomainStore } from '../../mobx';
+import { PortalRequiredServices } from './PortalRequiredServices';
 
 export interface PortletProps {
   //props中只有基类的基础信息，扩展信息还需单独获得
   portlet: Entity
   inTab?: boolean
-  portletDataSourceService: PortletDataSourceService
+  services: PortalRequiredServices
 
   [key: string]: any
 }
@@ -35,7 +37,7 @@ export abstract class Portlet<P extends PortletProps = PortletProps, S extends P
       this.portletService.get(this.props.portlet.id)
         .then(portlet => this.setState({ portlet }))
 
-    this.props.portlet.ds && this.props.portletDataSourceService.getData(this.props.portlet.ds)
+    this.props.portlet.ds && this.props.services.portletDataSourceService.getData(this.props.portlet.ds)
       .then(result =>
         this.setState({
           dataList: result && result.dataList

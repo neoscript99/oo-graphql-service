@@ -1,9 +1,9 @@
 import isObject from 'lodash/isObject'
-import { Criteria, CriteriaOrder } from '../';
-import { PageInfo } from '../DomainStore';
 import { BatchHttpLink } from 'apollo-link-batch-http';
 import ApolloClient from 'apollo-client';
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
+import { PageInfo } from '../DomainStore';
+import { Criteria, CriteriaOrder } from '../DomainGraphql';
 
 export function createApolloClient(fetchParams: BatchHttpLink.Options): ApolloClient<NormalizedCacheObject> {
   //WEB环境用浏览器原生fetch
