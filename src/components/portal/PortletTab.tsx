@@ -3,21 +3,17 @@ import { observer } from 'mobx-react';
 import { Card, Tabs } from 'antd';
 import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
-import { Portlet, PortletProps } from './Portlet';
+import { Portlet } from './Portlet';
 import { PortletSwitch } from './PortletSwitch';
 
 
 const { TabPane } = Tabs;
 
-interface P extends PortletProps {
-  portletTabRelService: DomainService<MobxDomainStore>
-}
-
 @observer
 export class PortletTab extends Portlet {
 
   async componentDidMount() {
-    const res = await this.props.portletTabRelService.listAll({
+    const res = await this.props.services.portletTabRelService.listAll({
       criteria: { eq: [['tab.id', this.props.portlet.id]] },
       orders: ['portletOrder']
     })

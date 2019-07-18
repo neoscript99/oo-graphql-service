@@ -26,7 +26,7 @@ export interface ListOptions {
  */
 export class DomainService<D extends DomainStore> {
   public store: D
-  private fieldsPromise: Promise<string>
+  public fieldsPromise: Promise<string>
 
   /**
    *
