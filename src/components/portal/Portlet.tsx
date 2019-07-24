@@ -36,12 +36,19 @@ export abstract class Portlet<P extends PortletProps = PortletProps, S extends P
     if (this.portletService)
       this.portletService.get(this.props.portlet.id)
         .then(portlet => this.setState({ portlet }))
+    else//保证state中有portlet信息
+      this.setState({ portlet: this.props.portlet })
 
-    this.props.portlet.ds && this.props.services.portletDataSourceService.getData(this.props.portlet.ds)
-      .then(result =>
-        this.setState({
-          dataList: result && result.dataList
-        }))
+    this.getData();
+  }
+
+  getData() {
+    if (this.props.portlet.ds)
+      this.props.services.portletDataSourceService.getData(this.props.portlet.ds)
+        .then(result =>
+          this.setState({
+            dataList: result && result.dataList
+          }))
   }
 
 }

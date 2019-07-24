@@ -7,6 +7,7 @@ import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
 import { Portlet } from './Portlet';
 import { Entity } from '../../DomainStore';
+import stringTemplate from 'string-template'
 
 export class PortletListView extends Portlet {
   render() {
@@ -31,7 +32,7 @@ export class PortletListView extends Portlet {
 
   private getColumns(portlet: Entity) {
     const {
-      titleFields, cateField, dateField, fromDateFormat, titleLink, toDateFormat
+      titleTemplate, titleWhiteSpace, cateField, dateField, fromDateFormat, titleLink, toDateFormat
     } = portlet;
     const linkTemplate = urlTemplate.parse(titleLink)
     const columns: ColumnProps<Entity>[] = [
@@ -45,10 +46,9 @@ export class PortletListView extends Portlet {
         title: 'title',
         key: 'titleFields',
         render: (text: string, record: any) =>
-          <a href={linkTemplate.expand(record)} target="_blank">
-            {(titleFields as string).split(',')
-              .map(tt => record[tt])
-              .join('-')}
+          <a href={linkTemplate.expand(record)} target="_blank"
+             style={{ whiteSpace: titleWhiteSpace }}>
+            {stringTemplate(titleTemplate, record)}
           </a>
       },
       {

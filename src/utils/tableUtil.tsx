@@ -21,7 +21,7 @@ export function numberLabel(value?: number): ReactNode {
 export function numberColorLabel(value?: number): ReactNode {
   if (value) {
     const color = value >= 0 ? 'red' : 'green'
-    return <span style={{ color }}>
+    return <span style={{ color, whiteSpace: 'nowrap' }}>
     {value < 0 && '↓'}{value > 0 && '↑'} {numeral(value)
       .format('0,0.00')}
     </span>
