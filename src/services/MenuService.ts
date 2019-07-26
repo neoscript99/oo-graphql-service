@@ -12,7 +12,7 @@ export class MenuService extends DomainService<MenuStore> {
     this.menuNodeFields = domainGraphql.getFields('MenuNode')
   }
 
-  getMenuTree(token: String): void {
+  getMenuTree(): void {
     this.menuNodeFields.then(fields =>
       this.domainGraphql.apolloClient.query<{ [key: string]: MenuNode }>({
         query: gql`query menuTreeQuery {
