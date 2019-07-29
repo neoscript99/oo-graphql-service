@@ -6,15 +6,22 @@ import { DomainService } from '../DomainService';
 import { MobxDomainStore } from '../mobx';
 import { DomainGraphql } from '../DomainGraphql';
 
+export interface UserEntity extends Entity {
+  account: string
+  name?: string
+  dept?: any
+}
+
 export interface LoginInfo {
   success: boolean
   token: string
-  user: Entity
+  user?: UserEntity
+  casAccount?: string
   error?: string
 }
 
 export interface AfterLogin {
-  (account: string, token: string): void
+  (loginInfo: LoginInfo): void
 }
 
 const USERNAME_KEY = 'loginUsername'
@@ -49,17 +56,17 @@ export class UserService extends DomainService<MobxDomainStore> {
       }
     })
       .then(data => {
-        const login = data.data!.login
-        if (login.success) {
-          this.afterLogin(login.user.account, login.token)
-          this.changeCurrentItem(login.user as Entity)
+        const loginInfo = data.data!.login
+        if (loginInfo.success) {
+          this.afterLogin(loginInfo)
+          this.changeCurrentItem(loginInfo.user as Entity)
           if (remember)
             this.saveLoginInfoLocal(username, passwordHash)
         } else {
-          message.info(login.error);
+          message.info(loginInfo.error);
           this.clearLoginInfoLocal();
         }
-        return login
+        return loginInfo
       })
   }
 
@@ -87,13 +94,16 @@ export class UserService extends DomainService<MobxDomainStore> {
   }
 
   casLogin(): Promise<LoginInfo> {
-    return this.domainGraphql.apolloClient.mutate<{ casLogin: any }>({
+    return this.domainGraphql.apolloClient.mutate<{ casLogin: LoginInfo }>({
       mutation: gql`mutation casLoginAction {
                       casLogin {
                         success
                         error
                         token
-                        account
+                        user{
+                          id, account, name      
+                        }
+                        casAccount
                       }
                     }`,
       fetchPolicy: 'no-cache',
@@ -102,19 +112,19 @@ export class UserService extends DomainService<MobxDomainStore> {
       }
     })
       .then(data => {
-        const login = data.data!.casLogin
-        if (login.success) {
-          this.afterLogin(login.account, login.token)
-          this.changeCurrentItem(login)
+        const loginInfo = data.data!.casLogin
+        if (loginInfo.success) {
+          this.afterLogin(loginInfo)
+          this.changeCurrentItem(loginInfo.user ? loginInfo.user : { account: loginInfo.casAccount })
         } else {
-          message.info(login.error);
+          message.info(loginInfo.error);
         }
-        return login
+        return loginInfo
       })
   }
 
   devLogin(account: string, token: string) {
     this.changeCurrentItem({ account, token })
-    this.afterLogin(account, token)
+    this.afterLogin({ user: { account }, token, success: true })
   }
 }

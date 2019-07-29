@@ -28,11 +28,11 @@ function getTree(menuNode: MenuNode, clickHandle: MenuClickHandler) {
   return (menuNode.menu.app)
     ? (
       <Menu.Item key={menuNode.menu.id} onClick={clickHandle.bind(null, menuNode.menu)}>
-        <Icon type="file" />
+        <Icon type={menuNode.menu.icon || 'file'} />
         <span>{menuNode.menu.label}</span>
       </Menu.Item>)
     : (<SubMenu key={menuNode.menu.id}
-                title={<span><Icon type="folder" />{menuNode.menu.label}</span>}>
+                title={<span><Icon type={menuNode.menu.icon || 'folder'} />{menuNode.menu.label}</span>}>
       {menuNode.subMenus.map((subNode) => getTree(subNode, clickHandle))}
     </SubMenu>)
 }
