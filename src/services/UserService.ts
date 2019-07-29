@@ -15,7 +15,7 @@ export interface UserEntity extends Entity {
 export interface LoginInfo {
   success: boolean
   token: string
-  user?: UserEntity
+  user: UserEntity
   casAccount?: string
   error?: string
 }
@@ -115,7 +115,8 @@ export class UserService extends DomainService<MobxDomainStore> {
         const loginInfo = data.data!.casLogin
         if (loginInfo.success) {
           this.afterLogin(loginInfo)
-          this.changeCurrentItem(loginInfo.user ? loginInfo.user : { account: loginInfo.casAccount })
+          loginInfo.user = loginInfo.user || { account: loginInfo.casAccount }
+          this.changeCurrentItem(loginInfo.user)
         } else {
           message.info(loginInfo.error);
         }
