@@ -15,7 +15,7 @@ export function booleanLabel(value: boolean): string {
 
 export function numberLabel(value?: number): ReactNode {
   return value ? numeral(value)
-    .format('0,0.00') : null;
+    .format('0,0') : null;
 }
 
 export function numberColorLabel(value?: number): ReactNode {
@@ -23,7 +23,7 @@ export function numberColorLabel(value?: number): ReactNode {
     const color = value >= 0 ? 'red' : 'green'
     return <span style={{ color, whiteSpace: 'nowrap' }}>
     {value < 0 && '↓'}{value > 0 && '↑'} {numeral(value)
-      .format('0,0.00')}
+      .format('0,0')}
     </span>
   } else
     return null

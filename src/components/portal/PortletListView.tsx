@@ -32,34 +32,45 @@ export class PortletListView extends Portlet {
 
   private getColumns(portlet: Entity) {
     const {
-      titleTemplate, titleWhiteSpace, cateField, dateField, fromDateFormat, titleLink, toDateFormat
+      titleTemplate, titleWhiteSpace, titleMaxSize, cateField, dateField, fromDateFormat, titleLink, toDateFormat
     } = portlet;
-    const linkTemplate = urlTemplate.parse(titleLink)
+    const linkTemplate = titleLink && urlTemplate.parse(titleLink)
     const columns: ColumnProps<Entity>[] = [
       {
+        title: 'title',
+        key: 'titleFields',
+        render: (text: string, record: any) => {
+          const titleStr: string = titleTemplate && stringTemplate(titleTemplate, record);
+          return (
+            <a href={titleLink ? linkTemplate.expand(record) : '#'} target="_blank"
+               style={{ whiteSpace: titleWhiteSpace }}>
+              {(titleMaxSize && titleMaxSize > 0)
+                ? <p style={{ width: titleMaxSize + 'em', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
+                  {titleStr}
+                </p>
+                : titleStr
+              }
+            </a>)
+        }
+      }
+    ]
+    if (cateField)
+      columns.push({
         title: 'category',
         dataIndex: cateField,
         render: (text: string) => `[${text}]`,
         fixed: 'left'
-      },
-      {
-        title: 'title',
-        key: 'titleFields',
-        render: (text: string, record: any) =>
-          <a href={linkTemplate.expand(record)} target="_blank"
-             style={{ whiteSpace: titleWhiteSpace }}>
-            {stringTemplate(titleTemplate, record)}
-          </a>
-      },
-      {
-        title: 'date',
-        dataIndex: dateField,
-        align: 'right',
-        render: dateStringConvert.bind(null, fromDateFormat, toDateFormat),
-        fixed: 'right'
-      }
-    ]
-    return columns.filter(col => cateField || col.title !== 'category');
+      });
+    if (dateField)
+      columns.push(
+        {
+          title: 'date',
+          dataIndex: dateField,
+          align: 'right',
+          render: dateStringConvert.bind(null, fromDateFormat, toDateFormat),
+          fixed: 'right'
+        })
+    return columns
   }
 
   get portletService(): DomainService<MobxDomainStore> {
