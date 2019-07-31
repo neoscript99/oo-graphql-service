@@ -8,6 +8,8 @@ import { MobxDomainStore } from '../../mobx';
 import { Portlet } from './Portlet';
 import { Entity } from '../../DomainStore';
 import stringTemplate from 'string-template'
+import styled from 'styled-components';
+
 
 export class PortletListView extends Portlet {
   render() {
@@ -15,10 +17,23 @@ export class PortletListView extends Portlet {
       return null;
     const { inTab } = this.props;
     const { portlet, dataList } = this.state
-    const { portletName, rowKey, extraLink } = this.state.portlet;
+    const { portletName, titleWhiteSpace, titleMaxSize, rowKey, extraLink } = this.state.portlet;
 
     const extraLinkA = extraLink && <a href={extraLink} target='_blank'>更多</a>;
-    const Content = <Table dataSource={dataList} columns={this.getColumns(portlet)}
+    const TitleText = titleMaxSize ? styled.p`
+    white-space: ${titleWhiteSpace};
+    overflow: hidden;
+    width: ${titleMaxSize}em;
+    text-overflow: ellipsis;
+    margin: 0;
+    :hover {
+      overflow: visible;
+      white-space: normal;
+    }`
+      : styled.p`
+    white-space: ${titleWhiteSpace};
+    margin: 0;`;
+    const Content = <Table dataSource={dataList} columns={this.getColumns(portlet, TitleText)}
                            rowKey={rowKey} pagination={false} showHeader={false} size='middle' bordered={false}
                            footer={inTab ? (() => <div style={{
                              textAlign: 'right',
@@ -30,9 +45,9 @@ export class PortletListView extends Portlet {
       </Card>
   }
 
-  private getColumns(portlet: Entity) {
+  private getColumns(portlet: Entity, TitleText: any) {
     const {
-      titleTemplate, titleWhiteSpace, titleMaxSize, cateField, dateField, fromDateFormat, titleLink, toDateFormat
+      titleTemplate, cateField, dateField, fromDateFormat, titleLink, toDateFormat
     } = portlet;
     const linkTemplate = titleLink && urlTemplate.parse(titleLink)
     const columns: ColumnProps<Entity>[] = [
@@ -41,18 +56,10 @@ export class PortletListView extends Portlet {
         key: 'titleFields',
         render: (text: string, record: any) => {
           const titleStr: string = titleTemplate && stringTemplate(titleTemplate, record);
-          const titleStyle = (titleMaxSize && titleMaxSize > 0) ? {
-            width: titleMaxSize + 'em',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            margin: 0
-          } : { margin: 0 }
+
           return (
-            <a href={titleLink ? linkTemplate.expand(record) : '#'} target="_blank"
-               style={{ whiteSpace: titleWhiteSpace }}>
-              <p style={titleStyle}>
-                {titleStr}
-              </p>
+            <a href={titleLink ? linkTemplate.expand(record) : '#'} target="_blank">
+              <TitleText>{titleStr}</TitleText>
             </a>)
         }
       }

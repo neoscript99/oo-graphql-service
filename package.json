@@ -33,6 +33,7 @@
     "moment": "^2.24.0",
     "numeral": "^2.0.6",
     "string-template": "^1.0.0",
+    "styled-components": "^4.3.2",
     "url-template": "^2.0.8"
   },
   "devDependencies": {
