@@ -25,7 +25,7 @@ export class PortletListView extends Portlet {
                              backgroundColor: 'inherit'
                            }}>{extraLinkA}</div>) : undefined} />
     return inTab ? Content :
-      <Card title={portletName} extra={extraLinkA}>
+      <Card title={portletName} extra={extraLinkA} style={this.props.style}>
         {Content}
       </Card>
   }
@@ -41,15 +41,18 @@ export class PortletListView extends Portlet {
         key: 'titleFields',
         render: (text: string, record: any) => {
           const titleStr: string = titleTemplate && stringTemplate(titleTemplate, record);
+          const titleStyle = (titleMaxSize && titleMaxSize > 0) ? {
+            width: titleMaxSize + 'em',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            margin: 0
+          } : { margin: 0 }
           return (
             <a href={titleLink ? linkTemplate.expand(record) : '#'} target="_blank"
                style={{ whiteSpace: titleWhiteSpace }}>
-              {(titleMaxSize && titleMaxSize > 0)
-                ? <p style={{ width: titleMaxSize + 'em', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
-                  {titleStr}
-                </p>
-                : titleStr
-              }
+              <p style={titleStyle}>
+                {titleStr}
+              </p>
             </a>)
         }
       }

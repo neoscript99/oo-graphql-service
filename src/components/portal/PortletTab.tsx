@@ -26,7 +26,7 @@ export class PortletTab extends Portlet {
 
     const { portletList } = this.state
     return (
-      <Card>
+      <Card style={this.props.style}>
         <Tabs>
           {portletList.map(ptl => <TabPane tab={ptl.portletName} key={ptl.id}>
             <PortletSwitch key={ptl.id} portlet={ptl} inTab={true}

@@ -31,7 +31,8 @@ const PortletMapping = ({ portlet, portletMap, inTab, services }: PortletSwitchP
     const map = { ...defaultPortalMap, ...portletMap };
     if (map[portlet.type]) {
       const Portlet = map[portlet.type];
-      return <Portlet portlet={portlet} inTab={inTab} services={services} />
+      const portletStyle = portlet.style ? JSON.parse(portlet.style) : {}
+      return <Portlet portlet={portlet} inTab={inTab} services={services} style={portletStyle} />
     } else
       return <NotExists portlet={portlet} services={services} />
   }

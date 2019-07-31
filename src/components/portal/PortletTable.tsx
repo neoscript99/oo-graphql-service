@@ -29,7 +29,7 @@ export class PortletTable extends Portlet<PortletProps, PortletTableState> {
       col.sorter = col.sortFun && commonSortFunctions[col.sortFun].bind(null, col.dataIndex)
     })
     return (
-      <Card title={table.portletName}>
+      <Card title={table.portletName} style={this.props.style}>
         <Table dataSource={dataList} columns={columns}
                rowKey={table.rowKey}
                pagination={{ pageSize: table.pageSize }} bordered />

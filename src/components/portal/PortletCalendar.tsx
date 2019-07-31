@@ -6,7 +6,7 @@ import 'moment/locale/zh-cn';
 import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
 import { Portlet } from './Portlet';
-import zh from "antd/lib/calendar/locale/zh_CN";
+import zh from 'antd/lib/calendar/locale/zh_CN';
 
 moment.locale('zh-cn');
 
@@ -18,7 +18,7 @@ export class PortletCalendar extends Portlet {
 
     const { portletName, dateLink } = this.state.portlet;
     return (
-      <Card title={portletName} extra={<a href={dateLink} target='_blank'>更多</a>}>
+      <Card title={portletName} extra={<a href={dateLink} target='_blank'>更多</a>} style={this.props.style}>
         <div style={{ border: '1px solid #d9d9d9', borderRadius: 4 }}>
           <Calendar locale={zh} fullscreen={false} dateCellRender={this.cellRender.bind(this, 'day')}
                     monthCellRender={this.cellRender.bind(this, 'month')} />

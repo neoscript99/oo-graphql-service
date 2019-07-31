@@ -9,7 +9,7 @@ export interface PortletProps {
   portlet: Entity
   inTab?: boolean
   services: PortalRequiredServices
-
+  style?: React.CSSProperties;
   [key: string]: any
 }
 
