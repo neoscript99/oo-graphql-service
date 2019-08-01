@@ -21,7 +21,7 @@ export class PortletListView extends Portlet {
 
     const extraLinkA = extraLink && <a href={extraLink} target='_blank'>更多</a>;
     const TitleText = titleMaxSize ? styled.p`
-    white-space: ${titleWhiteSpace};
+    white-space: nowrap;
     overflow: hidden;
     width: ${titleMaxSize}em;
     text-overflow: ellipsis;
