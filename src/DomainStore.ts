@@ -5,6 +5,8 @@ export interface PageInfo {
   isLastPage?: boolean
 }
 
+export const DEFAULT_PAGE_INFO = { currentPage: 1, totalCount: -1, isLastPage: false, pageSize: 10 }
+
 export interface FieldError {
   field?: String
   message?: String

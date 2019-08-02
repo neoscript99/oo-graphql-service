@@ -4,13 +4,13 @@ import { PaginationConfig, TableProps } from 'antd/lib/table';
 import { EntityListState, EntityList } from './EntityList';
 import { Entity } from '../DomainStore';
 import { ListResult } from '../DomainGraphql';
-import { toPageInfo } from '../utils';
+import { fromPageInfo, toPageInfo } from '../utils';
 
 export abstract class EntityPageList<P = any, S extends EntityListState = EntityListState>
   extends EntityList<P, S> {
 
   pagination: PaginationConfig = {
-    pageSize: 5,
+    pageSize: this.defaultPageSize,
     onChange: this.pageChange.bind(this),
     onShowSizeChange: this.pageSizeChange.bind(this),
     showSizeChanger: true,
@@ -33,15 +33,13 @@ export abstract class EntityPageList<P = any, S extends EntityListState = Entity
   }
 
   query(): Promise<ListResult> {
+    console.debug(`${this.className}.query:${this.toString()}`);
     const promise = this.domainService.listPage({
       ...this.queryParam,
       pageInfo: toPageInfo(this.pagination)
     })
-      .then((data: ListResult) => {
-        this.pagination.total = data.totalCount
-        return data
-      })
-    this.showLoading(promise)
+    this.updateTableProps(promise)
     return promise;
   }
+
 }

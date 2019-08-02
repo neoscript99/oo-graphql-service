@@ -37,6 +37,14 @@ export function toPageInfo(pagination: PaginationConfig): PageInfo {
   }
 }
 
+export function fromPageInfo(pageInfo: PageInfo): PaginationConfig {
+  return {
+    current: pageInfo.currentPage || 1,
+    pageSize: pageInfo.pageSize || 10,
+    total: pageInfo.totalCount
+  }
+}
+
 export const commonColumnRenders = { booleanLabel, timeFormater, numberLabel, numberColorLabel }
 export const commonColumns = {
   enabled: { title: '是否启用', dataIndex: 'enabled', render: booleanLabel },

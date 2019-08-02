@@ -37,4 +37,8 @@ export class User extends EntityPageList<AdminPageProps> {
   get domainService(): DomainService<MobxDomainStore> {
     return this.props.services.userService;
   }
+
+  get defaultPageSize() {
+    return 2
+  }
 }

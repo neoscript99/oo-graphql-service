@@ -37,5 +37,9 @@ export class Role extends EntityList<AdminPageProps> {
   protected get queryParam(): ListOptions {
     return { orders: [['lastUpdated', 'desc']] };
   }
+
+  get defaultPageSize() {
+    return 2
+  }
 }
 

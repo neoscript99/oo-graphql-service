@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
-import { TableProps } from 'antd/lib/table';
 import { getClassName } from '../utils/langUtil';
 import { Entity } from '../DomainStore';
 import { DomainService, ListOptions } from '../DomainService';
 import { MobxDomainStore } from '../mobx';
 import { ListResult } from '../DomainGraphql';
+import { PaginationConfig, TableProps } from 'antd/lib/table';
+import { Tag } from 'antd';
+import { fromPageInfo, toPageInfo } from '../utils';
 
 export interface EntityListState {
   tableProps?: TableProps<Entity>
@@ -12,34 +14,53 @@ export interface EntityListState {
 
 export abstract class EntityList<P = any, S extends EntityListState = EntityListState>
   extends Component<P, S> {
-  tableProps: TableProps<Entity> = { loading: false, pagination: false }
-  firstMount = true;
+  //这里配置的是前台分页信息，展示所有数据
+  pagination: PaginationConfig = {
+    pageSize: this.defaultPageSize,
+    showSizeChanger: true,
+    showQuickJumper: true,
+    showTotal: (total) => <Tag color="blue">总记录数：{total}</Tag>
+  }
+  tableProps: TableProps<Entity> = {
+    loading: false, pagination: this.pagination
+  }
   uuid = new Date();
 
   abstract get domainService(): DomainService<MobxDomainStore>;
 
   query(): Promise<ListResult> {
+    console.debug(`${this.className}.query:${this.toString()}`);
     const p = this.domainService.listAll(this.queryParam)
-    this.showLoading(p)
+    this.updateTableProps(p)
     return p
   }
 
-  showLoading(promise: Promise<any>): void {
+  updateTableProps(promise: Promise<any>): void {
     this.tableProps.loading = true
     this.updateState()
-    promise.finally(() => {
-      this.tableProps.loading = false
-      this.updateState()
+    promise.then((data: ListResult) => {
+      this.pagination.total = data.totalCount
+      return data
     })
+      .finally(() => {
+        this.tableProps.loading = false
+        this.updateState()
+      })
   }
 
   componentDidMount(): void {
-    // todo firstMount功能还无法实现，目前react route的component每次都是新实例
-    if (this.firstMount) {
-      console.debug(`${this.className}.componentDidMount:${this.toString()}`);
-      this.query()
-      this.firstMount = false
+    const { store } = this.domainService;
+    if (store.needRefresh) {
+      this.query();
+      store.needRefresh = false;
+    } else {
+      this.restoreState()
+      this.updateState()
     }
+  }
+
+  restoreState() {
+    Object.assign(this.pagination, fromPageInfo(this.domainService.store.pageInfo))
   }
 
   protected updateState(): void {
@@ -61,4 +82,18 @@ export abstract class EntityList<P = any, S extends EntityListState = EntityList
     return getClassName(this)
   }
 
+  get defaultPageSize() {
+    return 8
+  }
+
+  pageChange(page: number, pageSize?: number): void {
+    this.pagination.current = page;
+    this.domainService.store.pageInfo = toPageInfo(this.pagination)
+  }
+
+  pageSizeChange(current: number, size: number): void {
+    this.pagination.pageSize = size
+    this.pagination.current = 1;
+    this.domainService.store.pageInfo = toPageInfo(this.pagination)
+  }
 }
