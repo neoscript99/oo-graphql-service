@@ -1,15 +1,13 @@
-import React, { ReactNode } from 'react'
+import React from 'react'
 import { observer } from 'mobx-react';
-import { Table } from 'antd';
-import { ColumnProps } from 'antd/lib/table';
 import { EntityPageList } from '../EntityPageList';
 import { AdminPageProps } from './AdminRequiredServices';
 import { commonColumns } from '../../utils';
-import { Entity } from '../../DomainStore';
 import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
+import { EntityColumnProps } from '../EntityList';
 
-const columns: Array<ColumnProps<Entity>> = [
+const columns: EntityColumnProps[] = [
   { title: '标题', dataIndex: 'title' },
   { title: '内容', dataIndex: 'content' },
   { title: '附件数', dataIndex: 'attachNum' },
@@ -18,18 +16,10 @@ const columns: Array<ColumnProps<Entity>> = [
 ];
 
 
-@observer
 export class Note extends EntityPageList<AdminPageProps> {
 
-  render(): ReactNode {
-    const { store } = this.domainService
-    return (
-      <Table dataSource={store.pageList}
-             columns={columns}
-             bordered
-             {...this.tableProps}
-             rowKey='id'>
-      </Table>)
+  get columns(): EntityColumnProps[] {
+    return columns
   }
 
   get domainService(): DomainService<MobxDomainStore> {

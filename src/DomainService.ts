@@ -92,7 +92,7 @@ export class DomainService<D extends DomainStore> {
    *
    *
    * @param {boolean} isAppend
-   * @param {PageInfo} pageInfo 此处传入pageInfo无效，以store.pageInfo为准
+   * @param {PageInfo} pageInfo 此处传入pageInfo优先，以store.pageInfo为准
    * @param {{criteria?: Criteria; orders?: CriteriaOrder[]}} rest
    * @returns {Promise<ListResult>}
    */
@@ -166,6 +166,10 @@ export class DomainService<D extends DomainStore> {
 
   delete(id: any): Promise<DeleteResult> {
     return this.domainGraphql.delete(this.domain, id)
+  }
+
+  syncPageInfo(newPageInfo: PageInfo) {
+    Object.assign(this.store.pageInfo, newPageInfo)
   }
 }
 

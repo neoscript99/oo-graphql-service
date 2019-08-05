@@ -1,15 +1,12 @@
-import React, { ReactNode } from 'react'
-import { observer } from 'mobx-react';
-import { Table } from 'antd';
-import { ColumnProps } from 'antd/lib/table';
+import React from 'react'
 import { AdminPageProps } from './AdminRequiredServices';
-import { Entity } from '../../DomainStore';
 import { commonColumns } from '../../utils';
 import { EntityPageList } from '../EntityPageList';
 import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
+import { EntityColumnProps } from '../EntityList';
 
-const columns: Array<ColumnProps<Entity>> = [
+const columns: EntityColumnProps[] = [
   { title: '姓名', dataIndex: 'name' },
   { title: '帐号', dataIndex: 'account' },
   { title: '所属机构', dataIndex: 'dept.name' },
@@ -20,25 +17,17 @@ const columns: Array<ColumnProps<Entity>> = [
 ];
 
 
-@observer
 export class User extends EntityPageList<AdminPageProps> {
-
-  render(): ReactNode {
-    const { store } = this.domainService
-    return (
-      <Table dataSource={store.pageList}
-             columns={columns}
-             bordered
-             {...this.tableProps}
-             rowKey='id'>
-      </Table>)
+  constructor(props: AdminPageProps) {
+    super(props);
+    this.tableProps.pagination.pageSize = 2;
   }
 
   get domainService(): DomainService<MobxDomainStore> {
     return this.props.services.userService;
   }
 
-  get defaultPageSize() {
-    return 2
+  get columns(): EntityColumnProps[] {
+    return columns
   }
 }

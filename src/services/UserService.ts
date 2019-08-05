@@ -3,8 +3,8 @@ import { sha256 } from 'js-sha256'
 import { message } from 'antd';
 import { Entity } from '../DomainStore';
 import { DomainService } from '../DomainService';
-import { MobxDomainStore } from '../mobx';
 import { DomainGraphql } from '../DomainGraphql';
+import { UserStore } from '../stores';
 
 export interface UserEntity extends Entity {
   account: string
@@ -27,10 +27,10 @@ export interface AfterLogin {
 const USERNAME_KEY = 'loginUsername'
 const PASSWORD_KEY = 'loginPassword'
 
-export class UserService extends DomainService<MobxDomainStore> {
+export class UserService extends DomainService<UserStore> {
 
   constructor(private afterLogin: AfterLogin, domainGraphql: DomainGraphql) {
-    super('user', MobxDomainStore, domainGraphql);
+    super('user', UserStore, domainGraphql);
     this.changeCurrentItem({})
   }
 

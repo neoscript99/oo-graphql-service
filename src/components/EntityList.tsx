@@ -1,32 +1,78 @@
-import React, { Component } from 'react'
+import React, { Component, ReactNode } from 'react'
 import { getClassName } from '../utils/langUtil';
 import { Entity } from '../DomainStore';
 import { DomainService, ListOptions } from '../DomainService';
 import { MobxDomainStore } from '../mobx';
 import { ListResult } from '../DomainGraphql';
-import { PaginationConfig, TableProps } from 'antd/lib/table';
-import { Tag } from 'antd';
+import { ColumnProps, PaginationConfig, TableProps, TableRowSelection } from 'antd/lib/table';
+import { Button, message, Table, Tag } from 'antd';
 import { fromPageInfo, toPageInfo } from '../utils';
 
 export interface EntityListState {
-  tableProps?: TableProps<Entity>
+  selectedRowKeys?: any[]
+  dataList?: Entity[]
 }
 
+export interface EntityTableProps extends TableProps<Entity> {
+  pagination: PaginationConfig
+  rowSelection: TableRowSelection<Entity>;
+}
+
+export interface EntityColumnProps extends ColumnProps<Entity> {
+
+}
+
+/**
+ * EntityList的pagination配置的是前台分页信息，展示所有数据
+ */
 export abstract class EntityList<P = any, S extends EntityListState = EntityListState>
   extends Component<P, S> {
-  //这里配置的是前台分页信息，展示所有数据
-  pagination: PaginationConfig = {
-    pageSize: this.defaultPageSize,
-    showSizeChanger: true,
-    showQuickJumper: true,
-    showTotal: (total) => <Tag color="blue">总记录数：{total}</Tag>
-  }
-  tableProps: TableProps<Entity> = {
-    loading: false, pagination: this.pagination
+  tableProps: EntityTableProps = {
+    loading: false,
+    rowKey: 'id',
+    rowSelection: {
+      onChange: this.onSelectChange.bind(this),
+      hideDefaultSelections: true
+    },
+    bordered: true,
+    pagination: {
+      pageSize: 10,
+      current: 1,
+      showSizeChanger: true,
+      showQuickJumper: true,
+      showTotal: (total) => <Tag color="blue">总记录数：{total}</Tag>,
+      onChange: this.pageChange.bind(this),
+      onShowSizeChange: this.pageSizeChange.bind(this),
+    }
   }
   uuid = new Date();
 
+
+  render(): ReactNode {
+    if (!this.state)
+      return null;
+    const { selectedRowKeys } = this.state;
+    const selectedNum = selectedRowKeys ? selectedRowKeys.length : 0;
+    return (
+      <div>
+        <div style={{ marginBottom: 16 }}>
+          <Button type="primary" disabled={selectedNum === 0}>
+            Reload
+          </Button>
+          <span style={{ marginLeft: 8 }}>
+            {selectedNum > 0 ? `Selected ${selectedNum} items` : ''}
+          </span>
+        </div>
+        <Table dataSource={this.state.dataList}
+               columns={this.columns}
+               {...this.tableProps}>
+        </Table>
+      </div>)
+  }
+
   abstract get domainService(): DomainService<MobxDomainStore>;
+
+  abstract get columns(): EntityColumnProps[];
 
   query(): Promise<ListResult> {
     console.debug(`${this.className}.query:${this.toString()}`);
@@ -37,35 +83,40 @@ export abstract class EntityList<P = any, S extends EntityListState = EntityList
 
   updateTableProps(promise: Promise<any>): void {
     this.tableProps.loading = true
-    this.updateState()
+    this.forceUpdate()
     promise.then((data: ListResult) => {
-      this.pagination.total = data.totalCount
+      this.tableProps.pagination.total = data.totalCount
+      this.setState({ dataList: data.results })
+      this.updateStorePageInfo()
       return data
     })
+      .catch(e => {
+        message.info(`查询出错：${e}`);
+        throw(e)
+      })
       .finally(() => {
         this.tableProps.loading = false
-        this.updateState()
+        this.forceUpdate()
       })
   }
 
   componentDidMount(): void {
+    this.setState({ selectedRowKeys: [] })
     const { store } = this.domainService;
     if (store.needRefresh) {
       this.query();
       store.needRefresh = false;
     } else {
       this.restoreState()
-      this.updateState()
     }
   }
 
   restoreState() {
-    Object.assign(this.pagination, fromPageInfo(this.domainService.store.pageInfo))
+    const { pageInfo, allList } = this.domainService.store
+    Object.assign(this.tableProps.pagination, fromPageInfo(pageInfo))
+    this.setState({ dataList: allList })
   }
 
-  protected updateState(): void {
-    this.setState({ tableProps: this.tableProps })
-  }
 
   protected get queryParam(): ListOptions {
     return {
@@ -82,18 +133,27 @@ export abstract class EntityList<P = any, S extends EntityListState = EntityList
     return getClassName(this)
   }
 
-  get defaultPageSize() {
-    return 8
-  }
 
   pageChange(page: number, pageSize?: number): void {
-    this.pagination.current = page;
-    this.domainService.store.pageInfo = toPageInfo(this.pagination)
+    this.tableProps.pagination.current = page;
+    this.forceUpdate()
+    this.updateStorePageInfo()
   }
 
   pageSizeChange(current: number, size: number): void {
-    this.pagination.pageSize = size
-    this.pagination.current = 1;
-    this.domainService.store.pageInfo = toPageInfo(this.pagination)
+    this.tableProps.pagination.pageSize = size
+    this.tableProps.pagination.current = 1;
+    this.forceUpdate()
+    this.updateStorePageInfo()
   }
+
+  updateStorePageInfo() {
+    this.domainService.syncPageInfo(toPageInfo(this.tableProps.pagination))
+  }
+
+  onSelectChange(selectedRowKeys) {
+    this.tableProps.rowSelection.selectedRowKeys = selectedRowKeys;
+    this.setState({ selectedRowKeys });
+  };
+
 }
