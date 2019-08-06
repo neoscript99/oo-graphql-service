@@ -157,6 +157,13 @@ export class DomainService<D extends DomainStore> {
       .then(data => this.changeCurrentItem(<Entity>data))
   }
 
+  /**
+   * create or update
+   * @param newItem
+   */
+  save(newItem: Entity): Promise<Entity> {
+    return newItem.id ? this.update(newItem.id, newItem) : this.create(newItem)
+  }
 
   get(id: any): Promise<Entity> {
     return this.fieldsPromise.then(fields => this.domainGraphql.get(this.domain, fields, id))

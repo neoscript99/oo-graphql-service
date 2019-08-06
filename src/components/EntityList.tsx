@@ -7,10 +7,12 @@ import { ListResult } from '../DomainGraphql';
 import { ColumnProps, PaginationConfig, TableProps, TableRowSelection } from 'antd/lib/table';
 import { Button, message, Table, Tag } from 'antd';
 import { fromPageInfo, toPageInfo } from '../utils';
+import { FormComponentProps, WrappedFormUtils } from 'antd/lib/form/Form';
 
 export interface EntityListState {
   selectedRowKeys?: any[]
   dataList?: Entity[]
+  formProps?: EntityFormProps
 }
 
 export interface EntityTableProps extends TableProps<Entity> {
@@ -20,6 +22,13 @@ export interface EntityTableProps extends TableProps<Entity> {
 
 export interface EntityColumnProps extends ColumnProps<Entity> {
 
+}
+
+export interface EntityFormProps extends FormComponentProps {
+  title: string
+  okText: string
+  domainService: DomainService<MobxDomainStore>
+  item: Entity
 }
 
 /**
@@ -48,7 +57,7 @@ export abstract class EntityList<P = any, S extends EntityListState = EntityList
   uuid = new Date();
 
 
-  render(): ReactNode {
+  render() {
     if (!this.state)
       return null;
     const { selectedRowKeys } = this.state;
@@ -56,12 +65,15 @@ export abstract class EntityList<P = any, S extends EntityListState = EntityList
     return (
       <div>
         <div style={{ marginBottom: 16 }}>
-          <Button type="primary" disabled={selectedNum === 0}>
-            Reload
+          <Button type="primary" icon='plus-circle' style={{ marginRight: 6 }}>
+            新增
           </Button>
-          <span style={{ marginLeft: 8 }}>
-            {selectedNum > 0 ? `Selected ${selectedNum} items` : ''}
-          </span>
+          <Button type="primary" disabled={selectedNum !== 1} icon="edit" style={{ marginRight: 6 }}>
+            修改
+          </Button>
+          <Button type="primary" disabled={selectedNum === 0} icon='delete' style={{ marginRight: 6 }}>
+            删除
+          </Button>
         </div>
         <Table dataSource={this.state.dataList}
                columns={this.columns}
