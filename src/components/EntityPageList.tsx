@@ -1,9 +1,9 @@
 import React from 'react'
-import { EntityListState, EntityList } from './EntityList';
+import { EntityListState, EntityList, EntityListProps } from './EntityList';
 import { ListResult } from '../DomainGraphql';
 import { fromPageInfo } from '../utils';
 
-export abstract class EntityPageList<P = any, S extends EntityListState = EntityListState>
+export abstract class EntityPageList<P extends EntityListProps = EntityListProps, S extends EntityListState = EntityListState>
   extends EntityList<P, S> {
 
   pageChange(page: number, pageSize?: number): void {

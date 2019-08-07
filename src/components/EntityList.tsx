@@ -1,13 +1,19 @@
-import React, { Component, ReactNode } from 'react'
+import React, { Component } from 'react'
 import { getClassName } from '../utils/langUtil';
 import { Entity } from '../DomainStore';
 import { DomainService, ListOptions } from '../DomainService';
 import { MobxDomainStore } from '../mobx';
 import { ListResult } from '../DomainGraphql';
 import { ColumnProps, PaginationConfig, TableProps, TableRowSelection } from 'antd/lib/table';
-import { Button, message, Table, Tag } from 'antd';
+import { Button, Form, message, Popconfirm, Table, Tag } from 'antd';
 import { fromPageInfo, toPageInfo } from '../utils';
-import { FormComponentProps, WrappedFormUtils } from 'antd/lib/form/Form';
+import { EntityForm, EntityFormProps } from './EntityForm';
+import { FormWrappedProps } from 'antd/lib/form/interface';
+
+export interface EntityListProps {
+  name: string
+  formComponent?: React.ComponentType<EntityFormProps>
+}
 
 export interface EntityListState {
   selectedRowKeys?: any[]
@@ -21,20 +27,13 @@ export interface EntityTableProps extends TableProps<Entity> {
 }
 
 export interface EntityColumnProps extends ColumnProps<Entity> {
-
-}
-
-export interface EntityFormProps extends FormComponentProps {
-  title: string
-  okText: string
-  domainService: DomainService<MobxDomainStore>
-  item: Entity
+  initValue?: any
 }
 
 /**
  * EntityList的pagination配置的是前台分页信息，展示所有数据
  */
-export abstract class EntityList<P = any, S extends EntityListState = EntityListState>
+export abstract class EntityList<P extends EntityListProps = EntityListProps, S extends EntityListState = EntityListState>
   extends Component<P, S> {
   tableProps: EntityTableProps = {
     loading: false,
@@ -60,27 +59,43 @@ export abstract class EntityList<P = any, S extends EntityListState = EntityList
   render() {
     if (!this.state)
       return null;
-    const { selectedRowKeys } = this.state;
+    //@ts-ignore
+    const FormComponent = EntityForm.formWrapper(this.props.formComponent || EntityForm)
+
+    const { selectedRowKeys, formProps, dataList } = this.state;
     const selectedNum = selectedRowKeys ? selectedRowKeys.length : 0;
     return (
       <div>
+        {formProps && FormComponent && <FormComponent {...formProps} />}
         <div style={{ marginBottom: 16 }}>
-          <Button type="primary" icon='plus-circle' style={{ marginRight: 6 }}>
+          <Button type="primary" icon='plus-circle' style={{ marginRight: 6 }}
+                  onClick={this.handleCreate}>
             新增
           </Button>
-          <Button type="primary" disabled={selectedNum !== 1} icon="edit" style={{ marginRight: 6 }}>
+          <Button type="primary" disabled={selectedNum !== 1} icon="edit" style={{ marginRight: 6 }}
+                  onClick={this.handleUpdate}>
             修改
           </Button>
-          <Button type="primary" disabled={selectedNum === 0} icon='delete' style={{ marginRight: 6 }}>
-            删除
-          </Button>
+
+          <Popconfirm
+            title="确定删除所选记录吗?"
+            onConfirm={this.handleDelete}
+            okText="确定"
+            cancelText="取消"
+            disabled={selectedNum === 0}
+          >
+            <Button type="primary" disabled={selectedNum === 0} icon='delete' style={{ marginRight: 6 }}>
+              删除
+            </Button>
+          </Popconfirm>
         </div>
-        <Table dataSource={this.state.dataList}
+        <Table dataSource={dataList}
                columns={this.columns}
                {...this.tableProps}>
         </Table>
       </div>)
   }
+
 
   abstract get domainService(): DomainService<MobxDomainStore>;
 
@@ -168,4 +183,67 @@ export abstract class EntityList<P = any, S extends EntityListState = EntityList
     this.setState({ selectedRowKeys });
   };
 
+
+  handleCreate = () => {
+    this.setState({
+      formProps: this.getFormProps('新增')
+    })
+  }
+
+  handleUpdate = () => {
+    const { selectedRowKeys, dataList } = this.state;
+    if (!selectedRowKeys || !dataList)
+      return;
+    const id = selectedRowKeys[0];
+    const item = dataList.find(v => v.id === id)
+    if (item)
+      this.setState({
+        formProps: this.getFormProps('修改', item)
+      })
+  }
+
+  handleDelete = () => {
+    const { selectedRowKeys } = this.state;
+    selectedRowKeys && Promise.all(selectedRowKeys.map(id => this.domainService.delete(id)))
+      .then(results => {
+        const errorResults = results.filter(res => !res.success)
+        if (errorResults.length > 0)
+          message.error(errorResults.map(res => res.error))
+        else
+          message.success('删除成功')
+        this.query()
+      })
+  }
+
+  handleFormSuccess = (item: Entity) => {
+    this.pageChange(1)
+    this.setState({ formProps: undefined })
+    this.query()
+  }
+
+  handleFormCancel = () => {
+    this.setState({ formProps: undefined })
+  }
+
+  handleFormError(reason: any) {
+    const notWork = <div>
+      <h2>保存失败：</h2>
+      <blockquote>{reason}</blockquote>
+    </div>
+    message.error(`保存失败：${reason}`)
+  }
+
+  getFormProps(action: string, item?: Entity): EntityFormProps {
+    //@ts-ignore
+    return {
+      title: `${action}${this.props.name}`,
+      okText: action,
+      domainService: this.domainService,
+      onSuccess: this.handleFormSuccess,
+      onCancel: this.handleFormCancel,
+      onError: this.handleFormError,
+      columns: this.columns,
+      item
+    }
+  }
 }

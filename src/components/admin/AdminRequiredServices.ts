@@ -1,6 +1,7 @@
 import { MenuService, UserService } from '../../services/';
 import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
+import { EntityListProps } from '../EntityList';
 
 export interface AdminRequiredServices {
   noteService: DomainService<MobxDomainStore>
@@ -10,6 +11,6 @@ export interface AdminRequiredServices {
   menuService: MenuService
 }
 
-export interface AdminPageProps {
+export interface AdminPageProps extends EntityListProps {
   services: AdminRequiredServices
 }
