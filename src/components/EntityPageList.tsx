@@ -17,9 +17,9 @@ export abstract class EntityPageList<P extends EntityListProps = EntityListProps
   }
 
   query(): Promise<ListResult> {
-    console.debug(`${this.className}.query:${this.toString()}`);
+    console.debug(`${this.className}(${this.toString()}).query`);
     const promise = this.domainService.listPage({
-      ...this.queryParam
+      ...this.getQueryParam()
     })
     this.updateTableProps(promise)
     return promise;

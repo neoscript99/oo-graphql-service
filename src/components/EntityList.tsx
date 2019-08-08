@@ -3,7 +3,7 @@ import { getClassName } from '../utils/langUtil';
 import { Entity } from '../DomainStore';
 import { DomainService, ListOptions } from '../DomainService';
 import { MobxDomainStore } from '../mobx';
-import { ListResult } from '../DomainGraphql';
+import { ListResult, DeleteResult } from '../DomainGraphql';
 import { ColumnProps, PaginationConfig, TableProps, TableRowSelection } from 'antd/lib/table';
 import { Button, Form, message, Popconfirm, Table, Tag } from 'antd';
 import { fromPageInfo, toPageInfo } from '../utils';
@@ -53,7 +53,7 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
       onShowSizeChange: this.pageSizeChange.bind(this),
     }
   }
-  uuid = new Date();
+  uuid = new Date().toISOString();
 
 
   render() {
@@ -69,17 +69,17 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
         {formProps && FormComponent && <FormComponent {...formProps} />}
         <div style={{ marginBottom: 16 }}>
           <Button type="primary" icon='plus-circle' style={{ marginRight: 6 }}
-                  onClick={this.handleCreate}>
+                  onClick={this.handleCreate.bind(this)}>
             新增
           </Button>
           <Button type="primary" disabled={selectedNum !== 1} icon="edit" style={{ marginRight: 6 }}
-                  onClick={this.handleUpdate}>
+                  onClick={this.handleUpdate.bind(this)}>
             修改
           </Button>
 
           <Popconfirm
             title="确定删除所选记录吗?"
-            onConfirm={this.handleDelete}
+            onConfirm={this.handleDelete.bind(this)}
             okText="确定"
             cancelText="取消"
             disabled={selectedNum === 0}
@@ -102,8 +102,8 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
   abstract get columns(): EntityColumnProps[];
 
   query(): Promise<ListResult> {
-    console.debug(`${this.className}.query:${this.toString()}`);
-    const p = this.domainService.listAll(this.queryParam)
+    console.debug(`${this.className}(${this.toString()}).query`);
+    const p = this.domainService.listAll(this.getQueryParam())
     this.updateTableProps(p)
     return p
   }
@@ -145,7 +145,10 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
   }
 
 
-  protected get queryParam(): ListOptions {
+  /**
+   * 不用get property是因为无法继承
+   */
+  getQueryParam(): ListOptions {
     return {
       criteria: {},
       orders: [['lastUpdated', 'desc',]]
@@ -183,45 +186,63 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
     this.setState({ selectedRowKeys });
   };
 
-
-  handleCreate = () => {
+  /**
+   * 不用lambda表达式是因为无法
+   */
+  handleCreate() {
     this.setState({
       formProps: this.getFormProps('新增')
     })
   }
 
-  handleUpdate = () => {
-    const { selectedRowKeys, dataList } = this.state;
-    if (!selectedRowKeys || !dataList)
-      return;
-    const id = selectedRowKeys[0];
-    const item = dataList.find(v => v.id === id)
+  handleUpdate() {
+    const item = this.getSelectItem()
     if (item)
       this.setState({
         formProps: this.getFormProps('修改', item)
       })
   }
 
-  handleDelete = () => {
+  handleDelete() {
     const { selectedRowKeys } = this.state;
     selectedRowKeys && Promise.all(selectedRowKeys.map(id => this.domainService.delete(id)))
-      .then(results => {
-        const errorResults = results.filter(res => !res.success)
-        if (errorResults.length > 0)
-          message.error(errorResults.map(res => res.error))
-        else
-          message.success('删除成功')
-        this.query()
-      })
+      .then(this.handleDeleteResults.bind(this))
   }
 
-  handleFormSuccess = (item: Entity) => {
+  handleDeleteResults(results: DeleteResult[]) {
+    const errorResults = results.filter(res => !res.success)
+    if (errorResults.length > 0)
+      message.error(errorResults.map(res => res.error))
+    else
+      message.success('删除成功')
+    this.query()
+  }
+
+  /**
+   * 不用get property是因为无法继承
+   */
+  getSelectItem() {
+    const { selectedRowKeys, dataList } = this.state;
+    if (!selectedRowKeys || !dataList)
+      return null;
+    const id = selectedRowKeys[0];
+    return dataList.find(v => v.id === id)
+  }
+
+  getSelectItems() {
+    const { selectedRowKeys, dataList } = this.state;
+    if (!selectedRowKeys || !dataList)
+      return [];
+    return dataList.filter(v => selectedRowKeys.includes(v.id))
+  }
+
+  handleFormSuccess(item: Entity) {
     this.pageChange(1)
     this.setState({ formProps: undefined })
     this.query()
   }
 
-  handleFormCancel = () => {
+  handleFormCancel() {
     this.setState({ formProps: undefined })
   }
 
@@ -239,11 +260,11 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
       title: `${action}${this.props.name}`,
       okText: action,
       domainService: this.domainService,
-      onSuccess: this.handleFormSuccess,
-      onCancel: this.handleFormCancel,
+      onSuccess: this.handleFormSuccess.bind(this),
+      onCancel: this.handleFormCancel.bind(this),
       onError: this.handleFormError,
       columns: this.columns,
-      item
+      inputItem: item
     }
   }
 }

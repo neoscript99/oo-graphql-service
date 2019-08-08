@@ -12,41 +12,48 @@ export interface EntityFormProps extends FormComponentProps {
   okText: string
   domainService: DomainService<MobxDomainStore>
   columns: EntityColumnProps[]
-  item?: Entity
+  inputItem?: Entity
   onSuccess: (item: Entity) => void
   onError: (reason: any) => void
   onCancel: () => void
+
+  [key: string]: any
 }
 
-export class EntityForm extends Component<EntityFormProps> {
+export class EntityForm<P extends EntityFormProps = EntityFormProps> extends Component<P> {
 
-  handleCancel = () => {
+  handleCancel() {
     this.props.onCancel()
   }
 
-  handleOK = () => {
-    const { form, domainService, item, onSuccess, onError } = this.props
-    form.validateFields((err, values) =>
-      err || domainService.save({ ...item, ...values })
-        .then(v => {
-          message.success('保存成功')
-          this.setState({ visible: false });
-          onSuccess(v)
-        })
-        .catch(reason => {
-          console.error(reason)
-          onError(reason)
-        }))
+  handleOK() {
+    const { form } = this.props
+    form.validateFields((err, saveItem) =>
+      err || this.saveEntity(saveItem))
+  }
+
+  saveEntity(saveItem: Entity) {
+    const { domainService, inputItem, onSuccess, onError } = this.props
+    domainService.save({ ...inputItem, ...saveItem })
+      .then(v => {
+        message.success('保存成功')
+        this.setState({ visible: false });
+        onSuccess(v)
+      })
+      .catch(reason => {
+        console.error(reason)
+        onError(reason)
+      })
   }
 
   static formWrapper = Form.create({
     name: new Date().toISOString(), mapPropsToFields(props: EntityFormProps) {
-      const { item, columns } = props;
-      if (item)
-        return Object.keys(item)
+      const { inputItem, columns } = props;
+      if (inputItem)
+        return Object.keys(inputItem)
           .reduce((fieldMap, key) => {
             fieldMap[key] = Form.createFormField({
-              value: item[key],
+              value: inputItem[key],
             })
             return fieldMap
           }, {})
