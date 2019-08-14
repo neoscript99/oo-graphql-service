@@ -15,6 +15,12 @@ export class ParamService extends DomainService<MobxDomainStore> {
 
   constructor(domainGraphql: DomainGraphql) {
     super('param', MobxDomainStore, domainGraphql);
+  }
+
+  /**
+   * 登陆成功后调用本方法
+   */
+  initDictList() {
     this.listAll({})
   }
 

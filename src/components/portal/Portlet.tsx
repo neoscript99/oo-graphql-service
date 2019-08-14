@@ -4,12 +4,19 @@ import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
 import { PortalRequiredServices } from './PortalRequiredServices';
 
+export interface PortletStyles {
+  portletStyle?: React.CSSProperties
+  cardBodyStyle?: React.CSSProperties
+  tabBarStyle?: React.CSSProperties
+}
+
 export interface PortletProps {
   //props中只有基类的基础信息，扩展信息还需单独获得
   portlet: Entity
   inTab?: boolean
   services: PortalRequiredServices
-  style?: React.CSSProperties;
+  style?: React.CSSProperties
+
   [key: string]: any
 }
 

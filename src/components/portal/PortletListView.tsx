@@ -33,12 +33,18 @@ export class PortletListView extends Portlet {
       : styled.p`
     white-space: ${titleWhiteSpace};
     margin: 0;`;
-    const Content = <Table dataSource={dataList} columns={this.getColumns(portlet, TitleText)}
-                           rowKey={rowKey} pagination={false} showHeader={false} size='middle' bordered={false}
-                           footer={inTab ? (() => <div style={{
-                             textAlign: 'right',
-                             backgroundColor: 'inherit'
-                           }}>{extraLinkA}</div>) : undefined} />
+    const ContentDiv = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    `
+    const Content = <ContentDiv>
+      <Table dataSource={dataList} columns={this.getColumns(portlet, TitleText)}
+             rowKey={rowKey} pagination={false} showHeader={false} size='middle'
+             bordered={false} />
+      {inTab && <div style={{ textAlign: 'right', margin: '1rem 1rem 0 0' }}>{extraLinkA}</div>}
+    </ContentDiv>
+
     return inTab ? Content :
       <Card title={portletName} extra={extraLinkA} style={this.props.style}>
         {Content}
