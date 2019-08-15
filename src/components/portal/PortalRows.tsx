@@ -1,5 +1,4 @@
 import React, { Fragment } from 'react';
-import { observer } from 'mobx-react';
 import { Row } from 'antd';
 import { clearEntity } from '../../utils/graphqlUtil';
 import { PortalCol } from './PortalCol';
@@ -11,16 +10,15 @@ interface P {
   portal: Entity
   customerPortletMap: PortletMap
   services: PortalRequiredServices
+  portalRowRelAllList: Entity[]
+  portletColRelAllList: Entity[]
 }
 
-@observer
 export class PortalRows extends React.Component<P> {
 
   render() {
-    const { portal, customerPortletMap, services: { portalRowRelService } } = this.props;
-    if (!portalRowRelService.store.allList)
-      return null;
-    const relList = portalRowRelService.store.allList
+    const { portal, customerPortletMap, portalRowRelAllList, portletColRelAllList } = this.props;
+    const relList = portalRowRelAllList
       .filter(value => value.portal.id === portal.id)
 
     return <Fragment>
@@ -30,7 +28,8 @@ export class PortalRows extends React.Component<P> {
             .slice()
             .sort((a: Entity, b: Entity) => a.colOrder - b.colOrder)
             .map((col: Entity) => <PortalCol key={col.id} col={col} customerPortletMap={customerPortletMap}
-                                             services={this.props.services} />)
+                                             services={this.props.services}
+                                             portletColRelAllList={portletColRelAllList} />)
         }
       </Row>)}
     </Fragment>

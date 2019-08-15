@@ -1,5 +1,4 @@
 import React from 'react'
-import { observer } from 'mobx-react';
 import { EntityPageList } from '../EntityPageList';
 import { AdminPageProps } from './AdminRequiredServices';
 import { commonColumns } from '../../utils';

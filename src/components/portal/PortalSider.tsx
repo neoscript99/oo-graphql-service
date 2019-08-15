@@ -1,5 +1,4 @@
 import React from 'react';
-import { observer } from 'mobx-react';
 import { Anchor, Layout } from 'antd';
 import { Entity } from '../../DomainStore';
 import { PortalRequiredServices } from './PortalRequiredServices';
@@ -12,17 +11,16 @@ const {
 interface P {
   portal: Entity
   services: PortalRequiredServices
+  portalRowRelAllList: Entity[]
+  portletColRelAllList: Entity[]
 }
 
-@observer
 export class PortalSider extends React.Component<P> {
 
   render() {
-    const { portalRowRelService, portletColRelService } = this.props.services;
-    if (!portalRowRelService.store.allList || !portletColRelService.store.allList)
-      return null;
+    const { portalRowRelAllList, portletColRelAllList } = this.props;
 
-    const rowRelList = portalRowRelService.store.allList
+    const rowRelList = portalRowRelAllList
       .filter(value => value.portal.id === this.props.portal.id)
 
     const portletList: Entity[] = []
@@ -31,7 +29,7 @@ export class PortalSider extends React.Component<P> {
         .slice()
         .sort((a: Entity, b: Entity) => a.colOrder - b.colOrder)
         .every((col: Entity) =>
-          portletColRelService.store.allList
+          portletColRelAllList
             .filter(colRel => colRel.col.id === col.id)
             .reduce<Entity[]>((list, colRel) => (list.push(colRel.portlet), list), portletList)
         )
