@@ -5,13 +5,20 @@ import { DomainService, ListOptions } from '../DomainService';
 import { MobxDomainStore } from '../mobx';
 import { ListResult, DeleteResult } from '../DomainGraphql';
 import { ColumnProps, PaginationConfig, TableProps, TableRowSelection } from 'antd/lib/table';
-import { Button, Form, message, Popconfirm, Table, Tag } from 'antd';
+import { Button, message, Popconfirm, Table, Tag } from 'antd';
 import { fromPageInfo, toPageInfo } from '../utils';
 import { EntityForm, EntityFormProps } from './EntityForm';
-import { FormWrappedProps } from 'antd/lib/form/interface';
+import { OperatorBar } from './OperatorBar';
+
+export interface OperatorSwitch {
+  update?: boolean
+  create?: boolean
+  delete?: boolean
+}
 
 export interface EntityListProps {
-  name: string
+  name?: string
+  operatorVisible?: OperatorSwitch
   formComponent?: React.ComponentType<EntityFormProps>
 }
 
@@ -55,40 +62,23 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
   }
   uuid = new Date().toISOString();
 
-
   render() {
     if (!this.state)
       return null;
+    const { formComponent, operatorVisible } = this.props
     //@ts-ignore
-    const FormComponent = EntityForm.formWrapper(this.props.formComponent || EntityForm)
+    const FormComponent = EntityForm.formWrapper(formComponent || EntityForm)
 
     const { selectedRowKeys, formProps, dataList } = this.state;
     const selectedNum = selectedRowKeys ? selectedRowKeys.length : 0;
     return (
       <div>
-        {formProps && FormComponent && <FormComponent {...formProps} />}
-        <div style={{ marginBottom: 16 }}>
-          <Button type="primary" icon='plus-circle' style={{ marginRight: 6 }}
-                  onClick={this.handleCreate.bind(this)}>
-            新增
-          </Button>
-          <Button type="primary" disabled={selectedNum !== 1} icon="edit" style={{ marginRight: 6 }}
-                  onClick={this.handleUpdate.bind(this)}>
-            修改
-          </Button>
-
-          <Popconfirm
-            title="确定删除所选记录吗?"
-            onConfirm={this.handleDelete.bind(this)}
-            okText="确定"
-            cancelText="取消"
-            disabled={selectedNum === 0}
-          >
-            <Button type="primary" disabled={selectedNum === 0} icon='delete' style={{ marginRight: 6 }}>
-              删除
-            </Button>
-          </Popconfirm>
-        </div>
+        {formProps && <FormComponent {...formProps} />}
+        <OperatorBar onCreate={this.handleCreate.bind(this)}
+                     onUpdate={this.handleUpdate.bind(this)}
+                     onDelete={this.handleDelete.bind(this)}
+                     operatorVisible={operatorVisible}
+                     operatorEnable={{ update: selectedNum === 1, delete: selectedNum > 0 }} />
         <Table dataSource={dataList}
                columns={this.columns}
                {...this.tableProps}>
@@ -115,16 +105,23 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
       this.tableProps.pagination.total = data.totalCount
       this.setState({ dataList: data.results })
       this.updateStorePageInfo()
+      this.tableProps.loading = false
+      this.forceUpdate()
       return data
     })
       .catch(e => {
+        this.tableProps.loading = false
+        this.forceUpdate()
         message.info(`查询出错：${e}`);
         throw(e)
       })
-      .finally(() => {
-        this.tableProps.loading = false
-        this.forceUpdate()
-      })
+    /*
+    chrome对finally的支持暂时还不稳定
+    .finally(() => {
+      this.tableProps.loading = false
+      this.forceUpdate()
+    })
+    */
   }
 
   componentDidMount(): void {
