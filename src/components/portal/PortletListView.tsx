@@ -9,6 +9,7 @@ import { Portlet } from './Portlet';
 import { Entity } from '../../DomainStore';
 import stringTemplate from 'string-template'
 import styled from 'styled-components';
+import { hiddenText } from '../../utils';
 
 
 export class PortletListView extends Portlet {
@@ -20,19 +21,12 @@ export class PortletListView extends Portlet {
     const { portletName, titleWhiteSpace, titleMaxSize, rowKey, extraLink } = this.state.portlet;
 
     const extraLinkA = extraLink && <a href={extraLink} target='_blank'>更多</a>;
-    const TitleText = titleMaxSize ? styled.p`
-    white-space: nowrap;
-    overflow: hidden;
-    width: ${titleMaxSize}em;
-    text-overflow: ellipsis;
-    margin: 0;
-    :hover {
-      overflow: visible;
-      white-space: normal;
-    }`
+    const TitleText = titleMaxSize
+      ? hiddenText(titleMaxSize)
       : styled.p`
     white-space: ${titleWhiteSpace};
     margin: 0;`;
+
     const ContentDiv = styled.div`
     display: flex;
     flex-direction: column;

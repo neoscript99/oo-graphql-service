@@ -1,8 +1,9 @@
 import React, { ReactNode } from 'react'
-import moment from 'moment';
+import moment, { max } from 'moment';
 import numeral from 'numeral';
 import { PaginationConfig } from 'antd/lib/table';
 import { PageInfo } from '../DomainStore';
+import { wordBreakText, hiddenText } from './styleUtil';
 
 export function timeFormater(date: Date): string {
   return moment(date)
@@ -29,6 +30,18 @@ export function numberColorLabel(value?: number): ReactNode {
     return null
 }
 
+export function hiddenTextRender(maxSize: number, value: string) {
+  const HiddenText = hiddenText(maxSize)
+  return <HiddenText>{value}</HiddenText>
+}
+
+export function wordBreakTextRender(maxSize: number, value: string) {
+  const BreakText = wordBreakText(maxSize)
+  return <BreakText>{value}</BreakText>
+}
+
+export const commonColumnRenders = { booleanLabel, timeFormater, numberLabel, numberColorLabel }
+
 export function toPageInfo(pagination: PaginationConfig): PageInfo {
   return {
     currentPage: pagination.current || 1,
@@ -45,7 +58,6 @@ export function fromPageInfo(pageInfo: PageInfo): PaginationConfig {
   }
 }
 
-export const commonColumnRenders = { booleanLabel, timeFormater, numberLabel, numberColorLabel }
 export const commonColumns = {
   enabled: { title: '是否启用', dataIndex: 'enabled', render: booleanLabel },
   editable: { title: '可编辑', dataIndex: 'editable', render: booleanLabel },
