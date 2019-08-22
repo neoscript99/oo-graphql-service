@@ -59,7 +59,7 @@ export class EntityForm<P extends EntityFormProps = EntityFormProps> extends Com
           }, {})
       else
         return columns.reduce((fieldMap, col) => {
-          if (col.dataIndex && col.initValue)
+          if (col.dataIndex && col.initValue !== undefined)
             fieldMap[col.dataIndex] = Form.createFormField({
               value: col.initValue,
             })
