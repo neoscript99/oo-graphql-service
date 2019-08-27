@@ -16,7 +16,7 @@ const columns: EntityColumnProps[] = [
 export class Role extends EntityList<AdminPageProps> {
   constructor(props: AdminPageProps) {
     super(props);
-    this.tableProps.pagination.pageSize = 2;
+    this.tableProps.pagination.pageSize = 6;
   }
 
   get domainService(): DomainService<MobxDomainStore> {
