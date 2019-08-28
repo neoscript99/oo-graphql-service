@@ -20,6 +20,11 @@ export interface LoginInfo {
   error?: string
 }
 
+export interface CasConfig {
+  clientEnabled: boolean
+  defaultRoles: string
+}
+
 export interface AfterLogin {
   (loginInfo: LoginInfo): void
 }
@@ -121,6 +126,24 @@ export class UserService extends DomainService<UserStore> {
           message.info(loginInfo.error);
         }
         return loginInfo
+      })
+  }
+
+  getCasConfig(): Promise<CasConfig> {
+    return this.domainGraphql.apolloClient.mutate<{ getCasConfig: CasConfig }>({
+      mutation: gql`query getCasConfigQuery {
+                      getCasConfig {
+                        clientEnabled
+                        defaultRoles
+                      }
+                    }`,
+      fetchPolicy: 'no-cache',
+      variables: {
+        ...this.domainGraphql.defaultVariables
+      }
+    })
+      .then(data => {
+        return data.data!.getCasConfig
       })
   }
 
