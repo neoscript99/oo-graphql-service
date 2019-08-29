@@ -151,4 +151,13 @@ export class UserService extends DomainService<UserStore> {
     this.changeCurrentItem({ account, token })
     this.afterLogin({ user: { account }, token, success: true })
   }
+
+  tryCasLogin(): Promise<CasConfig> {
+    return this.getCasConfig()
+      .then(casConfig => {
+        this.store.casConfig = casConfig;
+        casConfig.clientEnabled && this.casLogin()
+        return casConfig
+      })
+  }
 }
