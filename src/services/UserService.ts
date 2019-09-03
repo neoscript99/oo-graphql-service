@@ -130,8 +130,8 @@ export class UserService extends DomainService<UserStore> {
   }
 
   getCasConfig(): Promise<CasConfig> {
-    return this.domainGraphql.apolloClient.mutate<{ getCasConfig: CasConfig }>({
-      mutation: gql`query getCasConfigQuery {
+    return this.domainGraphql.apolloClient.query<{ getCasConfig: CasConfig }>({
+      query: gql`query getCasConfigQuery {
                       getCasConfig {
                         clientEnabled
                         defaultRoles
