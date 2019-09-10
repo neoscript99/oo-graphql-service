@@ -46,7 +46,7 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
     loading: false,
     rowKey: 'id',
     rowSelection: {
-      onChange: this.onSelectChange.bind(this),
+      onChange: this.changeSelectRows.bind(this),
       hideDefaultSelections: true
     },
     bordered: true,
@@ -163,22 +163,22 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
 
   pageChange(page: number, pageSize?: number): void {
     this.tableProps.pagination.current = page;
-    this.forceUpdate()
     this.updateStorePageInfo()
   }
 
   pageSizeChange(current: number, size: number): void {
     this.tableProps.pagination.pageSize = size
     this.tableProps.pagination.current = 1;
-    this.forceUpdate()
     this.updateStorePageInfo()
   }
 
   updateStorePageInfo() {
-    this.domainService.syncPageInfo(toPageInfo(this.tableProps.pagination))
+    this.domainService.syncPageInfo(toPageInfo(this.tableProps.pagination));
+    //目前几种情况下，更新store.pageInfo后，当前页面的选择记录都应该清空
+    this.changeSelectRows(undefined);
   }
 
-  onSelectChange(selectedRowKeys) {
+  changeSelectRows(selectedRowKeys) {
     this.tableProps.rowSelection.selectedRowKeys = selectedRowKeys;
     this.setState({ selectedRowKeys });
   };
