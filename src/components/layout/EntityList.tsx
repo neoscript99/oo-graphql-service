@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
-import { getClassName } from '../utils/langUtil';
-import { Entity } from '../DomainStore';
-import { DomainService, ListOptions } from '../DomainService';
-import { MobxDomainStore } from '../mobx';
-import { ListResult, DeleteResult } from '../DomainGraphql';
+import { Entity } from '../../DomainStore';
+import { DomainService, ListOptions } from '../../DomainService';
+import { MobxDomainStore } from '../../mobx';
+import { ListResult, DeleteResult } from '../../DomainGraphql';
 import { ColumnProps, PaginationConfig, TableProps, TableRowSelection } from 'antd/lib/table';
 import { Button, message, Popconfirm, Table, Tag } from 'antd';
-import { fromPageInfo, toPageInfo } from '../utils';
+import { fromPageInfo, toPageInfo, getClassName } from '../../utils';
 import { EntityForm, EntityFormProps } from './EntityForm';
 import { OperatorBar } from './OperatorBar';
 
@@ -174,7 +173,7 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
 
   updateStorePageInfo() {
     this.domainService.syncPageInfo(toPageInfo(this.tableProps.pagination));
-    //目前几种情况下，更新store.pageInfo后，当前页面的选择记录都应该清空
+    //目前几种情况下，更新store.pageInfo后，当前页面的选择记录j 都应该清空
     this.changeSelectRows(undefined);
   }
 
@@ -184,7 +183,7 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
   };
 
   /**
-   * 不用lambda表达式是因为无法
+   * 不用lambda表达式是因为无法被子类继承重载
    */
   handleCreate() {
     this.setState({

@@ -1,10 +1,9 @@
 import React from 'react'
 import { AdminPageProps } from './AdminRequiredServices';
 import { commonColumns } from '../../utils';
-import { EntityPageList } from '../EntityPageList';
+import { EntityPageList, EntityColumnProps } from '../layout';
 import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
-import { EntityColumnProps } from '../EntityList';
 
 const columns: EntityColumnProps[] = [
   { title: '姓名', dataIndex: 'name' },

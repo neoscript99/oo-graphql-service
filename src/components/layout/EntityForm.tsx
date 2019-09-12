@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 
 import { Form, message } from 'antd'
 import { FormComponentProps } from 'antd/lib/form';
-import { DomainService } from '../DomainService';
-import { MobxDomainStore } from '../mobx';
-import { Entity } from '../DomainStore';
+import { DomainService } from '../../DomainService';
+import { MobxDomainStore } from '../../mobx';
+import { Entity } from '../../DomainStore';
 import { EntityColumnProps } from './EntityList';
 
 export interface EntityFormProps extends FormComponentProps {

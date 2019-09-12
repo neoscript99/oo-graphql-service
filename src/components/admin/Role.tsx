@@ -1,7 +1,7 @@
 import React from 'react'
 import { AdminPageProps } from './AdminRequiredServices';
 import { booleanLabel, timeFormater } from '../../utils';
-import { EntityColumnProps, EntityList } from '../EntityList';
+import { EntityColumnProps, EntityList } from '../layout';
 import { MobxDomainStore } from '../../mobx';
 import { DomainService, ListOptions } from '../../DomainService';
 

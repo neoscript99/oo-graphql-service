@@ -1,7 +1,7 @@
 import React from 'react'
 import { EntityListState, EntityList, EntityListProps } from './EntityList';
-import { ListResult } from '../DomainGraphql';
-import { fromPageInfo } from '../utils';
+import { ListResult } from '../../DomainGraphql';
+import { fromPageInfo } from '../../utils';
 
 export abstract class EntityPageList<P extends EntityListProps = EntityListProps, S extends EntityListState = EntityListState>
   extends EntityList<P, S> {
