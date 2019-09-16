@@ -8,6 +8,7 @@ import { Button, message, Popconfirm, Table, Tag } from 'antd';
 import { fromPageInfo, toPageInfo, getClassName } from '../../utils';
 import { EntityForm, EntityFormProps } from './EntityForm';
 import { OperatorBar } from './OperatorBar';
+import { SearchBar } from './SearchBar';
 
 export interface OperatorSwitch {
   update?: boolean
@@ -19,6 +20,8 @@ export interface EntityListProps {
   name?: string
   operatorVisible?: OperatorSwitch
   formComponent?: React.ComponentType<EntityFormProps>
+  searchForm?: React.ComponentType
+  searchBarOnTop?: boolean
 }
 
 export interface EntityListState {
@@ -64,7 +67,7 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
   render() {
     if (!this.state)
       return null;
-    const { formComponent, operatorVisible } = this.props
+    const { formComponent, operatorVisible, searchBarOnTop, searchForm } = this.props
     //@ts-ignore
     const FormComponent = EntityForm.formWrapper(formComponent || EntityForm)
 
@@ -73,11 +76,17 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
     return (
       <div>
         {formProps && <FormComponent {...formProps} />}
-        <OperatorBar onCreate={this.handleCreate.bind(this)}
-                     onUpdate={this.handleUpdate.bind(this)}
-                     onDelete={this.handleDelete.bind(this)}
-                     operatorVisible={operatorVisible}
-                     operatorEnable={{ update: selectedNum === 1, delete: selectedNum > 0 }} />
+        {searchBarOnTop && searchForm &&
+        <SearchBar searchForm={searchForm!} onSearch={this.handleSearch.bind(this)} />}
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <OperatorBar onCreate={this.handleCreate.bind(this)}
+                       onUpdate={this.handleUpdate.bind(this)}
+                       onDelete={this.handleDelete.bind(this)}
+                       operatorVisible={operatorVisible}
+                       operatorEnable={{ update: selectedNum === 1, delete: selectedNum > 0 }} />
+          {!searchBarOnTop && searchForm &&
+          <SearchBar searchForm={searchForm!} onSearch={this.handleSearch.bind(this)} />}
+        </div>
         <Table dataSource={dataList}
                columns={this.columns}
                {...this.tableProps}>
@@ -263,4 +272,9 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
       inputItem: item
     }
   }
+
+  handleSearch(): void {
+    this.pageChange(1)
+  }
+
 }

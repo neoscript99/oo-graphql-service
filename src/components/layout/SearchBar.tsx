@@ -1,13 +1,19 @@
 import React, { Component } from 'react';
+import { Button, Form } from 'antd';
 
 export interface SearchBarProps {
-  onChange: () => void
-  onUpdate: () => void
-  onDelete: () => void
+  onSearch: () => void
+  searchForm: React.ComponentType
 }
 
-export class SearchBar extends Component {
+export class SearchBar extends Component<SearchBarProps> {
   render() {
-    return null;
+    const { searchForm } = this.props;
+    const SearchForm = Form.create({ name: 'entity_search_form' })(searchForm);
+    return <div style={{ display: 'flex' }}>
+      <SearchForm />
+      <Button title='查询' />
+      <Button title='重置' />
+    </div>;
   }
 }
