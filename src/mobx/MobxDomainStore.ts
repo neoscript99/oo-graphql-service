@@ -11,7 +11,8 @@ export class MobxDomainStore implements DomainStore {
               public currentItem: Entity = {},
               public allList: Entity[] = [],
               public pageList: Entity[] = [],
-              public needRefresh: boolean = true) {
+              public needRefresh: boolean = true,
+              public searchParam: any = null) {
   }
 }
 
@@ -20,5 +21,6 @@ decorate(MobxDomainStore, {
   allList: observable,
   pageList: observable,
   pageInfo: observable,
-  needRefresh: observable
+  needRefresh: observable,
+  searchParam: observable
 })

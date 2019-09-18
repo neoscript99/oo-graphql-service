@@ -1,19 +1,51 @@
-import React, { Component } from 'react';
+import React, { Component, CSSProperties } from 'react';
 import { Button, Form } from 'antd';
+import { SearchFormProps } from './SearchForm';
+import { FormComponentProps } from 'antd/lib/form';
 
-export interface SearchBarProps {
-  onSearch: () => void
-  searchForm: React.ComponentType
+export interface SearchFromBarProps extends FormComponentProps {
+  onSearch: (searchParam: any) => void
+  searchForm: React.ComponentType<SearchFormProps>
+  searchParam: any
 }
 
-export class SearchBar extends Component<SearchBarProps> {
+const buttonCss: CSSProperties = {
+  marginLeft: '0.5rem'
+}
+
+class SearchFromBar extends Component<SearchFromBarProps> {
   render() {
-    const { searchForm } = this.props;
-    const SearchForm = Form.create({ name: 'entity_search_form' })(searchForm);
-    return <div style={{ display: 'flex' }}>
-      <SearchForm />
-      <Button title='查询' />
-      <Button title='重置' />
+    const { form, searchForm: SearchFormComponent } = this.props;
+    return <div style={{ display: 'flex', alignItems: 'center' }}>
+      <SearchFormComponent form={form} onSearch={this.handleSearch.bind(this)} />
+      <Button icon='search' type='primary' style={buttonCss} title='查询' onClick={this.handleSearch.bind(this)} />
+      <Button icon='reload' style={buttonCss} title='重置' onClick={this.handleReset.bind(this)} />
     </div>;
   }
+
+  handleSearch() {
+    const { form, onSearch } = this.props;
+    form.validateFields((err, searchParam) =>
+      err || onSearch(searchParam))
+  }
+
+  handleReset() {
+    const { form, onSearch } = this.props;
+    form.resetFields()
+    onSearch(null)
+  }
 }
+
+
+export const SearchBar = Form.create({
+  name: `SearchBarFrom${new Date().toISOString()}`, mapPropsToFields(props: SearchFromBarProps) {
+    const { searchParam } = props;
+    return searchParam && Object.keys(searchParam)
+      .reduce((fieldMap, key) => {
+        fieldMap[key] = Form.createFormField({
+          value: searchParam[key],
+        })
+        return fieldMap
+      }, {})
+  }
+})(SearchFromBar)

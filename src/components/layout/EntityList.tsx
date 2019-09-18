@@ -4,11 +4,12 @@ import { DomainService, ListOptions } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
 import { ListResult, DeleteResult } from '../../DomainGraphql';
 import { ColumnProps, PaginationConfig, TableProps, TableRowSelection } from 'antd/lib/table';
-import { Button, message, Popconfirm, Table, Tag } from 'antd';
+import { message, Table, Tag } from 'antd';
 import { fromPageInfo, toPageInfo, getClassName } from '../../utils';
 import { EntityForm, EntityFormProps } from './EntityForm';
 import { OperatorBar } from './OperatorBar';
 import { SearchBar } from './SearchBar';
+import { SearchForm, SearchFormProps } from './SearchForm';
 
 export interface OperatorSwitch {
   update?: boolean
@@ -20,7 +21,7 @@ export interface EntityListProps {
   name?: string
   operatorVisible?: OperatorSwitch
   formComponent?: React.ComponentType<EntityFormProps>
-  searchForm?: React.ComponentType
+  searchForm?: React.ComponentType<SearchFormProps>
   searchBarOnTop?: boolean
 }
 
@@ -28,6 +29,7 @@ export interface EntityListState {
   selectedRowKeys?: any[]
   dataList?: Entity[]
   formProps?: EntityFormProps
+  searchParam?: any
 }
 
 export interface EntityTableProps extends TableProps<Entity> {
@@ -71,25 +73,26 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
     //@ts-ignore
     const FormComponent = EntityForm.formWrapper(formComponent || EntityForm)
 
-    const { selectedRowKeys, formProps, dataList } = this.state;
+    const { selectedRowKeys, formProps, dataList, searchParam } = this.state;
+
+    const searchBar = searchForm && <SearchBar onSearch={this.handleSearch.bind(this)}
+                                               searchForm={searchForm!}
+                                               searchParam={this.domainService.store.searchParam} />
     const selectedNum = selectedRowKeys ? selectedRowKeys.length : 0;
     return (
       <div>
         {formProps && <FormComponent {...formProps} />}
-        {searchBarOnTop && searchForm &&
-        <SearchBar searchForm={searchForm!} onSearch={this.handleSearch.bind(this)} />}
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        {searchBarOnTop && searchBar}
+        <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0.2rem 0' }}>
           <OperatorBar onCreate={this.handleCreate.bind(this)}
                        onUpdate={this.handleUpdate.bind(this)}
                        onDelete={this.handleDelete.bind(this)}
                        operatorVisible={operatorVisible}
                        operatorEnable={{ update: selectedNum === 1, delete: selectedNum > 0 }} />
-          {!searchBarOnTop && searchForm &&
-          <SearchBar searchForm={searchForm!} onSearch={this.handleSearch.bind(this)} />}
+          {!searchBarOnTop && searchBar}
         </div>
-        <Table dataSource={dataList}
-               columns={this.columns}
-               {...this.tableProps}>
+        <Table dataSource={dataList} columns={this.columns}
+               {...this.tableProps} >
         </Table>
       </div>)
   }
@@ -111,10 +114,9 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
     this.forceUpdate()
     promise.then((data: ListResult) => {
       this.tableProps.pagination.total = data.totalCount
-      this.setState({ dataList: data.results })
       this.updateStorePageInfo()
       this.tableProps.loading = false
-      this.forceUpdate()
+      this.setState({ dataList: data.results })
       return data
     })
       .catch(e => {
@@ -273,8 +275,8 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
     }
   }
 
-  handleSearch(): void {
+  handleSearch(searchParam: any): void {
+    this.domainService.store.searchParam = searchParam;
     this.pageChange(1)
   }
-
 }

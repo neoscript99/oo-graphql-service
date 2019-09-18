@@ -47,7 +47,7 @@ export class EntityForm<P extends EntityFormProps = EntityFormProps> extends Com
   }
 
   static formWrapper = Form.create({
-    name: new Date().toISOString(), mapPropsToFields(props: EntityFormProps) {
+    name: `EntityForm_${new Date().toISOString()}`, mapPropsToFields(props: EntityFormProps) {
       const { inputItem, columns } = props;
       if (inputItem)
         return Object.keys(inputItem)

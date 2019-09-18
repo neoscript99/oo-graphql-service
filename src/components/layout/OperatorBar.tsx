@@ -11,16 +11,16 @@ export interface OperatorBarProps {
 }
 
 const buttonCss: CSSProperties = {
-  margin: '0 0.5rem 0.5rem 0'
+  marginRight: '0.5rem'
 }
 
 export class OperatorBar extends Component<OperatorBarProps> {
   render() {
     const { onCreate, onUpdate, onDelete, operatorVisible, operatorEnable } = this.props;
-    if(!operatorVisible)
+    if (!operatorVisible)
       return null;
     return (
-      <div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         {operatorVisible.create && <Button type="primary" icon='plus-circle' style={buttonCss}
                                            onClick={onCreate}>
           新增

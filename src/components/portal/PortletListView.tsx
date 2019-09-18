@@ -1,7 +1,7 @@
 import React from 'react';
 import urlTemplate from 'url-template'
 import { Card, Table } from 'antd';
-import { dateStringConvert } from '../../utils/stringUtil';
+import { StringUtil } from '../../utils/stringUtil';
 import { ColumnProps } from 'antd/lib/table';
 import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
@@ -11,6 +11,7 @@ import stringTemplate from 'string-template'
 import styled from 'styled-components';
 import { hiddenText } from '../../utils';
 
+const { dateStringConvert } = StringUtil
 
 export class PortletListView extends Portlet {
   render() {
