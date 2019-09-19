@@ -9,7 +9,7 @@ import { fromPageInfo, toPageInfo, getClassName } from '../../utils';
 import { EntityForm, EntityFormProps } from './EntityForm';
 import { OperatorBar } from './OperatorBar';
 import { SearchBar } from './SearchBar';
-import { SearchForm, SearchFormProps } from './SearchForm';
+import { SearchFormProps } from './SearchForm';
 
 export interface OperatorSwitch {
   update?: boolean
@@ -42,7 +42,9 @@ export interface EntityColumnProps extends ColumnProps<Entity> {
 }
 
 /**
- * EntityList的pagination配置的是前台分页信息，展示所有数据
+ * EntityList不做分页，获取所有数据
+ * 但后台max还是限制了1000，所以大于这个记录数不能用EntityList，改用EntityPageList
+ * 这里的pagination配置的是前台分页信息
  */
 export abstract class EntityList<P extends EntityListProps = EntityListProps, S extends EntityListState = EntityListState>
   extends Component<P, S> {
@@ -171,7 +173,7 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
   }
 
 
-  pageChange(page: number, pageSize?: number): void {
+  pageChange(page: number): void {
     this.tableProps.pagination.current = page;
     this.updateStorePageInfo()
   }
@@ -277,6 +279,8 @@ export abstract class EntityList<P extends EntityListProps = EntityListProps, S 
 
   handleSearch(searchParam: any): void {
     this.domainService.store.searchParam = searchParam;
-    this.pageChange(1)
+    this.tableProps.pagination.current = 1;
+    this.updateStorePageInfo()
+    this.query()
   }
 }

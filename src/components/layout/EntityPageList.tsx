@@ -6,8 +6,8 @@ import { fromPageInfo } from '../../utils';
 export abstract class EntityPageList<P extends EntityListProps = EntityListProps, S extends EntityListState = EntityListState>
   extends EntityList<P, S> {
 
-  pageChange(page: number, pageSize?: number): void {
-    super.pageChange(page, pageSize)
+  pageChange(page: number): void {
+    super.pageChange(page)
     this.query()
   }
 
