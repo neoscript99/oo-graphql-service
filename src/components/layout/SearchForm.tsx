@@ -21,9 +21,8 @@ export abstract class SearchForm<P extends SearchFormProps = SearchFormProps> ex
 }
 
 export class SimpleSearchForm extends SearchForm {
-  getPlaceholder() {
-    return '查询关键字'
-  }
+  placeholder = '查询关键字'
+  width = '16em'
 
   render() {
     const { form: { getFieldDecorator } } = this.props;
@@ -31,7 +30,8 @@ export class SimpleSearchForm extends SearchForm {
       <Form layout="inline">
         <Form.Item>
           {getFieldDecorator('searchKey')(
-            <Input placeholder={this.getPlaceholder()} onKeyDown={this.searchOnEnter.bind(this)} />
+            <Input style={{ width: this.width }} placeholder={this.placeholder}
+                   onKeyDown={this.searchOnEnter.bind(this)} />
           )}
         </Form.Item>
       </Form>

@@ -12,17 +12,22 @@ export interface UserEntity extends Entity {
   dept?: any
 }
 
+/**
+ * 如果是系统自己认证：user 有 ， account 无
+ * 如果接入了cas认证：account 有， user 不一定有
+ */
 export interface LoginInfo {
   success: boolean
   token: string
-  user: UserEntity
-  casAccount?: string
+  user?: UserEntity
+  account: string
   error?: string
 }
 
 export interface CasConfig {
   clientEnabled: boolean
-  defaultRoles: string
+  casServerRoot?: string
+  defaultRoles?: string
 }
 
 export interface AfterLogin {
@@ -98,17 +103,17 @@ export class UserService extends DomainService<UserStore> {
     }
   }
 
-  casLogin(): Promise<LoginInfo> {
-    return this.domainGraphql.apolloClient.mutate<{ casLogin: LoginInfo }>({
-      mutation: gql`mutation casLoginAction {
-                      casLogin {
+  trySessionLogin(): Promise<LoginInfo> {
+    return this.domainGraphql.apolloClient.mutate<{ sessionLogin: LoginInfo }>({
+      mutation: gql`mutation sessionLoginAction {
+                      sessionLogin {
                         success
                         error
                         token
                         user{
                           id, account, name      
                         }
-                        casAccount
+                        account
                       }
                     }`,
       fetchPolicy: 'no-cache',
@@ -117,13 +122,13 @@ export class UserService extends DomainService<UserStore> {
       }
     })
       .then(data => {
-        const loginInfo = data.data!.casLogin
+        const loginInfo = data.data!.sessionLogin
         if (loginInfo.success) {
+          loginInfo.user = loginInfo.user || { account: loginInfo.account }
           this.afterLogin(loginInfo)
-          loginInfo.user = loginInfo.user || { account: loginInfo.casAccount }
           this.changeCurrentItem(loginInfo.user)
         } else {
-          message.info(loginInfo.error);
+          console.debug(loginInfo.error);
         }
         return loginInfo
       })
@@ -134,6 +139,7 @@ export class UserService extends DomainService<UserStore> {
       query: gql`query getCasConfigQuery {
                       getCasConfig {
                         clientEnabled
+                        casServerRoot
                         defaultRoles
                       }
                     }`,
@@ -143,21 +149,14 @@ export class UserService extends DomainService<UserStore> {
       }
     })
       .then(data => {
+        this.store.casConfig = data.data!.getCasConfig
         return data.data!.getCasConfig
       })
   }
 
   devLogin(account: string, token: string) {
     this.changeCurrentItem({ account, token })
-    this.afterLogin({ user: { account }, token, success: true })
+    this.afterLogin({ user: { account }, account, token, success: true })
   }
 
-  tryCasLogin(): Promise<CasConfig> {
-    return this.getCasConfig()
-      .then(casConfig => {
-        this.store.casConfig = casConfig;
-        casConfig.clientEnabled && this.casLogin()
-        return casConfig
-      })
-  }
 }
