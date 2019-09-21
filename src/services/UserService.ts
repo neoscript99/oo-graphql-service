@@ -42,6 +42,8 @@ export class UserService extends DomainService<UserStore> {
   constructor(private afterLogin: AfterLogin, domainGraphql: DomainGraphql) {
     super('user', UserStore, domainGraphql);
     this.changeCurrentItem({})
+    //cas默认为true，初始化时去获取服务端的配置信息，如果为false，再显示登录界面
+    this.getCasConfig()
   }
 
   login(username: string, password: string, remember: boolean = false): Promise<LoginInfo> {
@@ -132,6 +134,22 @@ export class UserService extends DomainService<UserStore> {
         }
         return loginInfo
       })
+  }
+
+  sessionLogout() {
+    this.domainGraphql.apolloClient.mutate<{ sessionLogout: any }>({
+      mutation: gql`mutation sessionLogoutAction {
+                      sessionLogout {
+                        success
+                        error
+                      }
+                    }`,
+      fetchPolicy: 'no-cache',
+      variables: {
+        ...this.domainGraphql.defaultVariables
+      }
+    })
+      .then(data => data.data!.sessionLogout.success || console.warn(data.data!.sessionLogout.error))
   }
 
   getCasConfig(): Promise<CasConfig> {
