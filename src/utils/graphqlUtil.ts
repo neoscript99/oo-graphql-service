@@ -6,12 +6,12 @@ import { PageInfo } from '../DomainStore';
 import { Criteria, CriteriaOrder } from '../DomainGraphql';
 
 /**
- * ApolloClient调用的web fetch接口会带上cookie，可以保持session
+ * 设置 credentials: 'include' , 调用的fetch接口会带上cookie，可以保持session
  * @param fetchParams
  */
 export function createApolloClient(fetchParams: BatchHttpLink.Options): ApolloClient<NormalizedCacheObject> {
   //WEB环境用浏览器原生fetch
-  const link = new BatchHttpLink(fetchParams);
+  const link = new BatchHttpLink({ credentials: 'include', ...fetchParams });
   const cache = new InMemoryCache();
   return new ApolloClient({ link, cache });
 }
