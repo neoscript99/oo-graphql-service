@@ -9,24 +9,27 @@ import {
   Entity,
   PageInfo,
   processCriteriaOrder,
-  processCriteriaPage
+  processCriteriaPage,
 } from './';
 
-
 export interface ListOptions {
-  criteria?: Criteria
-  pageInfo?: PageInfo//如果传入，覆盖store的pageInfo
-  orders?: CriteriaOrder[]
-  isAppend?: boolean
+  criteria?: Criteria;
+  //如果传入，覆盖store的pageInfo
+  pageInfo?: PageInfo;
+  orders?: CriteriaOrder[];
+  isAppend?: boolean;
 }
 
+export interface DictInitService {
+  initDictList();
+}
 /**
  * Mobx Store基类
  * 内部的属性会被JSON.stringify序列化，如果是嵌套结构或大对象，可以用Promise包装，规避序列化
  */
 export class DomainService<D extends DomainStore> {
-  public store: D
-  public fieldsPromise: Promise<string>
+  public store: D;
+  public fieldsPromise: Promise<string>;
 
   /**
    *
@@ -34,18 +37,16 @@ export class DomainService<D extends DomainStore> {
    * @param graphqlClient
    * @param dependStoreMap 依赖的其它store，格式如下：{aaStore:aa,bbStore:bb}
    */
-  constructor(public domain: string,
-              public storeClass: (new () => D),
-              public domainGraphql: DomainGraphql) {
-    this.store = new storeClass()
-    this.fieldsPromise = domainGraphql.getFields(upperFirst(domain))
+  constructor(public domain: string, public storeClass: new () => D, public domainGraphql: DomainGraphql) {
+    this.store = new storeClass();
+    this.fieldsPromise = domainGraphql.getFields(upperFirst(domain));
   }
 
-
   findFirst(criteria?: Criteria) {
-    const pageInfo = { pageSize: 1, currentPage: 1 }
-    return this.list({ criteria, pageInfo })
-      .then(data => data.totalCount > 0 && this.changeCurrentItem(data.results[0]))
+    const pageInfo = { pageSize: 1, currentPage: 1 };
+    return this.list({ criteria, pageInfo }).then(
+      data => data.totalCount > 0 && this.changeCurrentItem(data.results[0]),
+    );
   }
 
   /**
@@ -55,11 +56,10 @@ export class DomainService<D extends DomainStore> {
    */
 
   listAll(options: ListOptions): Promise<ListResult> {
-    return this.list(options)
-      .then(data => {
-        this.store.allList = data.results
-        return data
-      })
+    return this.list(options).then(data => {
+      this.store.allList = data.results;
+      return data;
+    });
   }
 
   /**
@@ -71,12 +71,12 @@ export class DomainService<D extends DomainStore> {
    */
 
   list({ criteria = {}, pageInfo, orders = this.defaultOrders }: ListOptions): Promise<ListResult> {
-    if (pageInfo)
-      processCriteriaPage(criteria, pageInfo)
-    if (orders && orders.length > 0)
-      processCriteriaOrder(criteria, orders)
+    if (pageInfo) processCriteriaPage(criteria, pageInfo);
+    if (orders && orders.length > 0) processCriteriaOrder(criteria, orders);
     //list需等待fieldsPromise执行完成
-    return this.fieldsPromise.then(fields => <Promise<ListResult>>this.domainGraphql.list(this.domain, fields, criteria))
+    return this.fieldsPromise.then(
+      fields => this.domainGraphql.list(this.domain, fields, criteria) as Promise<ListResult>,
+    );
   }
 
   /**
@@ -98,63 +98,54 @@ export class DomainService<D extends DomainStore> {
    */
   listPage({ isAppend = false, pageInfo, ...rest }: ListOptions): Promise<ListResult> {
     //查询第一页的时候，清空allList
-    if (pageInfo)
-      this.store.pageInfo = pageInfo
-    if (this.store.pageInfo.currentPage === 1)
-      this.store.allList = [];
-    return this.list({ pageInfo: this.store.pageInfo, ...rest })
-      .then(data => {
-        const { results, totalCount } = data;
-        this.store.pageList = results;
-        this.store.pageInfo.totalCount = totalCount;
-        this.store.pageInfo.isLastPage = (results.length < this.store.pageInfo.pageSize ||
-          this.store.pageInfo.pageSize * this.store.pageInfo.currentPage >= totalCount)
-        if (isAppend === true)
-          this.store.allList = this.store.allList.concat(results)
-        else
-          this.store.allList = results;
-        return data;
-      })
+    if (pageInfo) this.store.pageInfo = pageInfo;
+    if (this.store.pageInfo.currentPage === 1) this.store.allList = [];
+    return this.list({ pageInfo: this.store.pageInfo, ...rest }).then(data => {
+      const { results, totalCount } = data;
+      this.store.pageList = results;
+      this.store.pageInfo.totalCount = totalCount;
+      this.store.pageInfo.isLastPage =
+        results.length < this.store.pageInfo.pageSize ||
+        this.store.pageInfo.pageSize * this.store.pageInfo.currentPage >= totalCount;
+      if (isAppend === true) this.store.allList = this.store.allList.concat(results);
+      else this.store.allList = results;
+      return data;
+    });
   }
 
-
   listNextPage(param: ListOptions): string | Promise<ListResult> {
-    if (this.store.pageInfo.isLastPage)
-      return '已经到底了'
+    if (this.store.pageInfo.isLastPage) return '已经到底了';
     else {
       this.store.pageInfo.currentPage++;
       return this.listPage(param);
     }
   }
 
-
   listFirstPage(param: ListOptions): Promise<ListResult> {
     this.store.pageInfo.currentPage = 1;
     return this.listPage(param);
   }
-
 
   clearList() {
     this.store.pageList = [];
     this.store.allList = [];
   }
 
-
   changeCurrentItem(currentItem: Entity): Entity {
     this.store.currentItem = currentItem;
     return currentItem;
   }
 
-
   create(newItem: Entity): Promise<Entity> {
-    return this.fieldsPromise.then(fields => this.domainGraphql.create(this.domain, fields, newItem))
-      .then(data => this.changeCurrentItem(<Entity>data))
+    return this.fieldsPromise
+      .then(fields => this.domainGraphql.create(this.domain, fields, newItem))
+      .then(data => this.changeCurrentItem(data as Entity));
   }
 
-
   update(id: any, updateItem: Entity): Promise<Entity> {
-    return this.fieldsPromise.then(fields => this.domainGraphql.update(this.domain, fields, id, updateItem))
-      .then(data => this.changeCurrentItem(<Entity>data))
+    return this.fieldsPromise
+      .then(fields => this.domainGraphql.update(this.domain, fields, id, updateItem))
+      .then(data => this.changeCurrentItem(data as Entity));
   }
 
   /**
@@ -162,21 +153,20 @@ export class DomainService<D extends DomainStore> {
    * @param newItem
    */
   save(newItem: Entity): Promise<Entity> {
-    return newItem.id ? this.update(newItem.id, newItem) : this.create(newItem)
+    return newItem.id ? this.update(newItem.id, newItem) : this.create(newItem);
   }
 
   get(id: any): Promise<Entity> {
-    return this.fieldsPromise.then(fields => this.domainGraphql.get(this.domain, fields, id))
-      .then(data => this.changeCurrentItem(<Entity>data))
+    return this.fieldsPromise
+      .then(fields => this.domainGraphql.get(this.domain, fields, id))
+      .then(data => this.changeCurrentItem(data as Entity));
   }
 
-
   delete(id: any): Promise<DeleteResult> {
-    return this.domainGraphql.delete(this.domain, id)
+    return this.domainGraphql.delete(this.domain, id);
   }
 
   syncPageInfo(newPageInfo: PageInfo) {
-    Object.assign(this.store.pageInfo, newPageInfo)
+    Object.assign(this.store.pageInfo, newPageInfo);
   }
 }
-

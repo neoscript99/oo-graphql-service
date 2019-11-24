@@ -1,6 +1,6 @@
 import React from 'react'
 import { EntityPageList, EntityColumnProps } from '../layout';
-import { AdminPageProps } from './AdminRequiredServices';
+import { AdminPageProps } from './AdminServices';
 import { commonColumns } from '../../utils';
 import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';

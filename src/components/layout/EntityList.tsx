@@ -9,7 +9,7 @@ import { fromPageInfo, toPageInfo, getClassName } from '../../utils';
 import { EntityForm, EntityFormProps } from './EntityForm';
 import { OperatorBar } from './OperatorBar';
 import { SearchBar } from './SearchBar';
-import { SearchFormProps } from './SearchForm';
+import { SearchForm, SearchFormProps } from './SearchForm';
 
 export interface OperatorSwitch {
   update?: boolean;
@@ -20,15 +20,13 @@ export interface OperatorSwitch {
 export interface EntityListProps {
   name?: string;
   operatorVisible?: OperatorSwitch;
-  formComponent?: React.ComponentType<EntityFormProps>;
-  searchForm?: React.ComponentType<SearchFormProps>;
   searchBarOnTop?: boolean;
 }
 
 export interface EntityListState {
   selectedRowKeys?: any[];
   dataList?: Entity[];
-  formProps?: EntityFormProps;
+  formProps?: Partial<EntityFormProps>;
   searchParam?: any;
 }
 
@@ -40,7 +38,6 @@ export interface EntityTableProps extends TableProps<Entity> {
 export interface EntityColumnProps extends ColumnProps<Entity> {
   initValue?: any;
 }
-
 /**
  * EntityList不做分页，获取所有数据
  * 但后台max还是限制了1000，所以大于这个记录数不能用EntityList，改用EntityPageList
@@ -72,12 +69,10 @@ export abstract class EntityList<
 
   render() {
     if (!this.state) return null;
-    const { formComponent, operatorVisible, searchBarOnTop, searchForm } = this.props;
-    //@ts-ignore
-    const FormComponent = EntityForm.formWrapper(formComponent || EntityForm);
+    const { operatorVisible, searchBarOnTop } = this.props;
 
-    const { selectedRowKeys, formProps, dataList, searchParam } = this.state;
-
+    const { dataList } = this.state;
+    const searchForm = this.getSearchForm();
     const searchBar = searchForm && (
       <SearchBar
         onSearch={this.handleSearch.bind(this)}
@@ -85,10 +80,9 @@ export abstract class EntityList<
         searchParam={this.domainService.store.searchParam}
       />
     );
-    const selectedNum = selectedRowKeys ? selectedRowKeys.length : 0;
     return (
       <div>
-        {formProps && <FormComponent {...formProps} />}
+        {this.getEntityFormPop(this.state.formProps)}
         {searchBarOnTop && searchBar}
         <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0.2rem 0' }}>
           <OperatorBar
@@ -96,7 +90,7 @@ export abstract class EntityList<
             onUpdate={this.handleUpdate.bind(this)}
             onDelete={this.handleDelete.bind(this)}
             operatorVisible={operatorVisible}
-            operatorEnable={{ update: selectedNum === 1, delete: selectedNum > 0 }}
+            operatorEnable={this.getOperatorEnable()}
           />
           {!searchBarOnTop && searchBar}
         </div>
@@ -208,6 +202,13 @@ export abstract class EntityList<
     });
   }
 
+  /**
+   * 新增时的初始值
+   */
+  getInitItem(): Entity | undefined {
+    return undefined;
+  }
+
   handleUpdate() {
     const item = this.getSelectItem();
     if (item)
@@ -265,8 +266,7 @@ export abstract class EntityList<
     message.error(`保存失败：${reason}`);
   }
 
-  getFormProps(action: string, item?: Entity): EntityFormProps {
-    //@ts-ignore
+  getFormProps(action: string, item?: Entity): Partial<EntityFormProps> {
     return {
       title: `${action}${this.props.name}`,
       okText: action,
@@ -275,7 +275,7 @@ export abstract class EntityList<
       onCancel: this.handleFormCancel.bind(this),
       onError: this.handleFormError,
       columns: this.columns,
-      inputItem: item,
+      inputItem: item || this.getInitItem(),
     };
   }
 
@@ -284,5 +284,22 @@ export abstract class EntityList<
     this.tableProps.pagination.current = 1;
     this.updateStorePageInfo();
     this.query();
+  }
+  getEntityForm(): typeof EntityForm {
+    return EntityForm;
+  }
+  getEntityFormPop(formProps?: Partial<EntityFormProps>) {
+    if (formProps) {
+      const FormComponent = EntityForm.formWrapper(this.getEntityForm());
+      return <FormComponent {...formProps} />;
+    } else return null;
+  }
+  getSearchForm(): React.ComponentType<SearchFormProps> | null {
+    return null;
+  }
+  getOperatorEnable() {
+    const { selectedRowKeys } = this.state;
+    const selectedNum = selectedRowKeys ? selectedRowKeys.length : 0;
+    return { update: selectedNum === 1, delete: selectedNum > 0 };
   }
 }

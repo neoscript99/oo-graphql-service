@@ -39,7 +39,7 @@ const USERNAME_KEY = 'loginUsername';
 const PASSWORD_KEY = 'loginPassword';
 
 export class UserService extends DomainService<UserStore> {
-  constructor(private afterLogin: AfterLogin, domainGraphql: DomainGraphql) {
+  constructor(private afterLogins: AfterLogin[], domainGraphql: DomainGraphql) {
     super('user', UserStore, domainGraphql);
     this.changeCurrentItem({});
     //cas默认为true，初始化时去获取服务端的配置信息，如果为false，再显示登录界面
@@ -73,7 +73,7 @@ export class UserService extends DomainService<UserStore> {
         const loginInfo = data.data!.login;
         this.store.loginInfo = loginInfo;
         if (loginInfo.success) {
-          this.afterLogin(loginInfo);
+          this.doAfterLogin(loginInfo);
           this.changeCurrentItem(loginInfo.user as Entity);
           if (remember) this.saveLoginInfoLocal(username, passwordHash);
         } else {
@@ -135,7 +135,7 @@ export class UserService extends DomainService<UserStore> {
         this.store.loginInfo = loginInfo;
         if (loginInfo.success) {
           loginInfo.user = loginInfo.user || { account: loginInfo.account };
-          this.afterLogin(loginInfo);
+          this.doAfterLogin(loginInfo);
           this.changeCurrentItem(loginInfo.user);
         } else {
           console.debug(loginInfo.error);
@@ -188,6 +188,10 @@ export class UserService extends DomainService<UserStore> {
 
   devLogin(account: string, token: string) {
     this.changeCurrentItem({ account, token });
-    this.afterLogin({ user: { account }, account, token, success: true, roles: 'Public' });
+    this.doAfterLogin({ user: { account }, account, token, success: true, roles: 'Public' });
+  }
+
+  doAfterLogin(loginInfo: LoginInfo) {
+    this.afterLogins.forEach(afterLogin => afterLogin(loginInfo));
   }
 }

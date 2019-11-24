@@ -1,5 +1,5 @@
 import React from 'react'
-import { AdminPageProps } from './AdminRequiredServices';
+import { AdminPageProps } from './AdminServices';
 import { commonColumns } from '../../utils';
 import { EntityPageList, EntityColumnProps } from '../layout';
 import { DomainService } from '../../DomainService';

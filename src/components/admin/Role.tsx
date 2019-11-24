@@ -1,5 +1,5 @@
 import React from 'react'
-import { AdminPageProps } from './AdminRequiredServices';
+import { AdminPageProps } from './AdminServices';
 import { booleanLabel, timeFormater } from '../../utils';
 import { EntityColumnProps, EntityList } from '../layout';
 import { MobxDomainStore } from '../../mobx';
