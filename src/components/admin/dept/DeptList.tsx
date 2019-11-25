@@ -4,7 +4,7 @@ import { commonColumns, StringUtil } from '../../../utils';
 import { EntityPageList, EntityColumnProps, SimpleSearchForm, EntityFormProps } from '../../layout';
 import { DomainService, ListOptions } from '../../../DomainService';
 import { MobxDomainStore } from '../../../mobx';
-import { UserForm, UserFormProps } from './UserForm';
+import { DeptForm } from './DeptForm';
 import { Entity } from '../../../DomainStore';
 import { DeptEntity } from '../../../services/DeptService';
 
@@ -17,7 +17,7 @@ const columns: EntityColumnProps[] = [
   commonColumns.lastUpdated,
 ];
 
-export class UserList extends EntityPageList<AdminPageProps> {
+export class DeptList extends EntityPageList<AdminPageProps> {
   constructor(props: AdminPageProps) {
     super(props);
   }
@@ -35,11 +35,6 @@ export class UserList extends EntityPageList<AdminPageProps> {
     if (item) item.deptId = item.dept.id;
     return item;
   }
-  getFormProps(action: string, item?: Entity): Partial<EntityFormProps> {
-    const props = super.getFormProps(action, item);
-    (props as UserFormProps).deptList = this.props.services.deptService.store.allList as DeptEntity[];
-    return props;
-  }
   getInitItem() {
     return { editable: true };
   }
@@ -52,10 +47,10 @@ export class UserList extends EntityPageList<AdminPageProps> {
     };
   }
   getEntityForm() {
-    return UserForm;
+    return DeptForm;
   }
   getSearchForm() {
-    return UserSearchForm;
+    return DeptSearchForm;
   }
   getQueryParam(): ListOptions {
     const param = super.getQueryParam();
@@ -68,6 +63,6 @@ export class UserList extends EntityPageList<AdminPageProps> {
   }
 }
 
-export class UserSearchForm extends SimpleSearchForm {
+export class DeptSearchForm extends SimpleSearchForm {
   placeholder = '名称、帐号';
 }

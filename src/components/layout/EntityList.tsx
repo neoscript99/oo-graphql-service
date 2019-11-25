@@ -84,7 +84,10 @@ export abstract class EntityList<
       <div>
         {this.getEntityFormPop(this.state.formProps)}
         {searchBarOnTop && searchBar}
-        <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0.2rem 0' }}>
+        <div
+          style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', margin: '0.2rem 0' }}
+        >
+          {!searchBarOnTop && searchBar}
           <OperatorBar
             onCreate={this.handleCreate.bind(this)}
             onUpdate={this.handleUpdate.bind(this)}
@@ -92,7 +95,6 @@ export abstract class EntityList<
             operatorVisible={operatorVisible}
             operatorEnable={this.getOperatorEnable()}
           />
-          {!searchBarOnTop && searchBar}
         </div>
         <Table dataSource={dataList} columns={this.columns} {...this.tableProps}></Table>
       </div>
@@ -294,7 +296,7 @@ export abstract class EntityList<
       return <FormComponent {...formProps} />;
     } else return null;
   }
-  getSearchForm(): React.ComponentType<SearchFormProps> | null {
+  getSearchForm(): typeof SearchForm | null {
     return null;
   }
   getOperatorEnable() {

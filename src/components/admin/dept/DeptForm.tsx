@@ -1,13 +1,12 @@
 import React from 'react';
 import { Form, Input, Modal, Checkbox, Select } from 'antd';
-import { EntityForm, EntityFormProps } from '../../layout';
+import { EntityForm } from '../../layout';
 import { commonRules } from '../../../utils';
-import { DeptEntity } from '../../../services/DeptService';
 import { Entity } from '../../../DomainStore';
 import { sha256 } from 'js-sha256';
 const { required } = commonRules;
 const INIT_PASSWORD = 'abc_xyz';
-export class UserForm extends EntityForm<UserFormProps> {
+export class DeptForm extends EntityForm {
   render() {
     const {
       form: { getFieldDecorator },
@@ -74,9 +73,4 @@ export class UserForm extends EntityForm<UserFormProps> {
     else if (inputItem && saveItem.password !== inputItem.password) saveItem.password = sha256(saveItem.password);
     super.saveEntity(saveItem);
   }
-}
-
-export interface UserFormProps extends EntityFormProps {
-  deptList: DeptEntity[];
-  initPassword?: string;
 }

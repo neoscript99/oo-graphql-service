@@ -18,11 +18,11 @@ export interface UserEntity extends Entity {
  */
 export interface LoginInfo {
   success: boolean;
-  token: string;
+  token?: string;
   user?: UserEntity;
-  account: string;
+  account?: string;
   error?: string;
-  roles: string;
+  roles?: string;
 }
 
 export interface CasConfig {
@@ -56,6 +56,7 @@ export class UserService extends DomainService<UserStore> {
         mutation: gql`mutation loginAction {
                       login(username: "${username}", password: "${passwordHash}") {
                         success
+                        account
                         error
                         token
                         user{
@@ -97,6 +98,7 @@ export class UserService extends DomainService<UserStore> {
   clearLoginInfoLocal() {
     localStorage.removeItem(USERNAME_KEY);
     localStorage.removeItem(PASSWORD_KEY);
+    this.store.loginInfo = { success: false };
   }
 
   getLoginInfoLocal() {
@@ -134,7 +136,7 @@ export class UserService extends DomainService<UserStore> {
         const loginInfo = data.data!.sessionLogin;
         this.store.loginInfo = loginInfo;
         if (loginInfo.success) {
-          loginInfo.user = loginInfo.user || { account: loginInfo.account };
+          loginInfo.user = loginInfo.user || { account: loginInfo.account || '' };
           this.doAfterLogin(loginInfo);
           this.changeCurrentItem(loginInfo.user);
         } else {
