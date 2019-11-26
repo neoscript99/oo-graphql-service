@@ -1,11 +1,8 @@
 import React from 'react';
-import { Form, Input, Modal, Checkbox, Select } from 'antd';
+import { Form, Input, Modal, Checkbox, InputNumber } from 'antd';
 import { EntityForm } from '../../layout';
 import { commonRules } from '../../../utils';
-import { Entity } from '../../../DomainStore';
-import { sha256 } from 'js-sha256';
 const { required } = commonRules;
-const INIT_PASSWORD = 'abc_xyz';
 export class DeptForm extends EntityForm {
   render() {
     const {
@@ -22,34 +19,15 @@ export class DeptForm extends EntityForm {
         onOk={this.handleOK.bind(this)}
       >
         <Form labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
-          <Form.Item label="帐号">
-            {getFieldDecorator('account', {
-              rules: [required],
-            })(<Input maxLength={16} />)}
+          <Form.Item label="序号">
+            {getFieldDecorator('seq', {
+              initialValue: 1,
+            })(<InputNumber max={999999} />)}
           </Form.Item>
-          <Form.Item label="密码">
-            {getFieldDecorator('password', {
-              rules: [required],
-              initialValue: INIT_PASSWORD,
-            })(<Input maxLength={16} type="password" allowClear />)}
-          </Form.Item>
-          <Form.Item label="称呼">
+          <Form.Item label="机构名">
             {getFieldDecorator('name', {
               rules: [required],
             })(<Input maxLength={16} />)}
-          </Form.Item>
-          <Form.Item label="单位">
-            {getFieldDecorator('deptId', {
-              rules: [required],
-            })(
-              <Select>
-                {this.props.deptList.map(dept => (
-                  <Select.Option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </Select.Option>
-                ))}
-              </Select>,
-            )}
           </Form.Item>
           <Form.Item label="启用">
             {getFieldDecorator('enabled', {
@@ -60,17 +38,5 @@ export class DeptForm extends EntityForm {
         </Form>
       </Modal>
     );
-  }
-
-  saveEntity(saveItem: Entity) {
-    saveItem.dept = { id: saveItem.deptId };
-    saveItem.deptId = undefined;
-    const { inputItem } = this.props;
-    const initPassword = this.props.initPassword || INIT_PASSWORD;
-    //修改时，如果密码为初始密码，不做改动
-    //但同时，密码也不能改回初始密码
-    if (inputItem && inputItem.id && saveItem.password === initPassword) saveItem.password = inputItem.password;
-    else if (inputItem && saveItem.password !== inputItem.password) saveItem.password = sha256(saveItem.password);
-    super.saveEntity(saveItem);
   }
 }

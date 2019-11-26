@@ -15,6 +15,6 @@ export class DeptService extends DomainService<MobxDomainStore> implements DictI
   }
 
   initDictList() {
-    this.listAll({ criteria: { eq: [['enabled', true]] }, orders: ['seq'] });
+    this.listAll({ orders: ['seq'] });
   }
 }

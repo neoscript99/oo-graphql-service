@@ -12,6 +12,10 @@ import {
   processCriteriaPage,
 } from './';
 
+/**
+ * ListOptions.orders会做嵌套处理，但目前嵌套属性排序不成功，可能是DetachedCriteria的原因，原先在Flex中是成功的
+ * ListOptions.criteria.order不做处理，传入原始值
+ */
 export interface ListOptions {
   criteria?: Criteria;
   //如果传入，覆盖store的pageInfo

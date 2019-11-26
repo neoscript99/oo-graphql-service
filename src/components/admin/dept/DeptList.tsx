@@ -1,50 +1,26 @@
 import React from 'react';
 import { AdminPageProps } from '../AdminServices';
 import { commonColumns, StringUtil } from '../../../utils';
-import { EntityPageList, EntityColumnProps, SimpleSearchForm, EntityFormProps } from '../../layout';
-import { DomainService, ListOptions } from '../../../DomainService';
-import { MobxDomainStore } from '../../../mobx';
+import { EntityList, EntityColumnProps, SimpleSearchForm } from '../../layout';
+import { ListOptions } from '../../../DomainService';
 import { DeptForm } from './DeptForm';
-import { Entity } from '../../../DomainStore';
-import { DeptEntity } from '../../../services/DeptService';
 
 const columns: EntityColumnProps[] = [
-  { title: '姓名', dataIndex: 'name' },
-  { title: '帐号', dataIndex: 'account' },
-  { title: '所属机构', dataIndex: 'dept.name' },
+  { title: '序号', dataIndex: 'seq' },
+  { title: '机构名', dataIndex: 'name' },
   commonColumns.enabled,
-  commonColumns.editable,
   commonColumns.lastUpdated,
 ];
 
-export class DeptList extends EntityPageList<AdminPageProps> {
+export class DeptList extends EntityList<AdminPageProps> {
   constructor(props: AdminPageProps) {
     super(props);
   }
-
-  get domainService(): DomainService<MobxDomainStore> {
-    return this.props.services.userService;
+  get domainService() {
+    return this.props.services.deptService;
   }
-
-  get columns(): EntityColumnProps[] {
+  get columns() {
     return columns;
-  }
-
-  getSelectItem() {
-    const item = super.getSelectItem();
-    if (item) item.deptId = item.dept.id;
-    return item;
-  }
-  getInitItem() {
-    return { editable: true };
-  }
-
-  getOperatorEnable() {
-    const base = super.getOperatorEnable();
-    return {
-      update: base.update && this.getSelectItem()!.editable,
-      delete: base.delete && this.getSelectItems().every(item => item.editable),
-    };
   }
   getEntityForm() {
     return DeptForm;
@@ -53,11 +29,13 @@ export class DeptList extends EntityPageList<AdminPageProps> {
     return DeptSearchForm;
   }
   getQueryParam(): ListOptions {
-    const param = super.getQueryParam();
+    const param: ListOptions = {
+      orders: ['seq'],
+    };
     const { searchParam } = this.domainService.store;
     if (searchParam && StringUtil.isNotBlank(searchParam.searchKey)) {
       const key = `${searchParam.searchKey}%`;
-      param.criteria = { or: { ilike: [['name', key], ['account', key]] } };
+      param.criteria = { like: [['name', key]] };
     }
     return param;
   }

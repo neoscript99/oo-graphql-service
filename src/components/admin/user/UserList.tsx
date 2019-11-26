@@ -37,7 +37,9 @@ export class UserList extends EntityPageList<AdminPageProps> {
   }
   getFormProps(action: string, item?: Entity): Partial<EntityFormProps> {
     const props = super.getFormProps(action, item);
-    (props as UserFormProps).deptList = this.props.services.deptService.store.allList as DeptEntity[];
+    (props as UserFormProps).deptList = this.props.services.deptService.store.allList.filter(
+      dept => dept.enabled,
+    ) as DeptEntity[];
     return props;
   }
   getInitItem() {

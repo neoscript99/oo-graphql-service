@@ -59,7 +59,7 @@ export function fromPageInfo(pageInfo: PageInfo): PaginationConfig {
 }
 
 export const commonColumns: { [key: string]: EntityColumnProps } = {
-  enabled: { title: '是否启用', dataIndex: 'enabled', render: booleanLabel },
+  enabled: { title: '是否启用', dataIndex: 'enabled', initValue: true, render: booleanLabel },
   editable: { title: '可编辑', dataIndex: 'editable', initValue: true, render: booleanLabel },
   lastUser: { title: '修改人', dataIndex: 'lastUser.name' },
   lastUpdated: { title: '修改时间', dataIndex: 'lastUpdated', render: timeFormater },

@@ -6,7 +6,7 @@ import { DeptEntity } from '../../../services/DeptService';
 import { Entity } from '../../../DomainStore';
 import { sha256 } from 'js-sha256';
 const { required } = commonRules;
-const INIT_PASSWORD = 'abc_xyz';
+const INIT_PASSWORD = 'abc000';
 export class UserForm extends EntityForm<UserFormProps> {
   render() {
     const {
@@ -39,7 +39,7 @@ export class UserForm extends EntityForm<UserFormProps> {
               rules: [required],
             })(<Input maxLength={16} />)}
           </Form.Item>
-          <Form.Item label="单位">
+          <Form.Item label="机构">
             {getFieldDecorator('deptId', {
               rules: [required],
             })(
