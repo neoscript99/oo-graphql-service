@@ -11,6 +11,7 @@ import {
   processCriteriaOrder,
   processCriteriaPage,
 } from './';
+import { AbstractFetch } from './utils/fetch/AbstractFetch';
 
 /**
  * ListOptions.orders会做嵌套处理，但目前嵌套属性排序不成功，可能是DetachedCriteria的原因，原先在Flex中是成功的
@@ -41,7 +42,12 @@ export class DomainService<D extends DomainStore> {
    * @param graphqlClient
    * @param dependStoreMap 依赖的其它store，格式如下：{aaStore:aa,bbStore:bb}
    */
-  constructor(public domain: string, public storeClass: new () => D, public domainGraphql: DomainGraphql) {
+  constructor(
+    public domain: string,
+    public storeClass: new () => D,
+    public domainGraphql: DomainGraphql,
+    public fetchClient?: AbstractFetch,
+  ) {
     this.store = new storeClass();
     this.fieldsPromise = domainGraphql.getFields(upperFirst(domain));
   }

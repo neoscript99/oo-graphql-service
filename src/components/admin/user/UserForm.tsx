@@ -5,15 +5,51 @@ import { commonRules } from '../../../utils';
 import { DeptEntity } from '../../../services/DeptService';
 import { Entity } from '../../../DomainStore';
 import { sha256 } from 'js-sha256';
+import { CheckboxOptionType, CheckboxValueType } from 'antd/lib/checkbox/Group';
+import { AdminServices } from '../AdminServices';
 const { required } = commonRules;
 const INIT_PASSWORD = 'abc000';
-export class UserForm extends EntityForm<UserFormProps> {
+
+interface S {
+  allRoles: CheckboxOptionType[];
+  userRoleIds: string[];
+  deptList: DeptEntity[];
+}
+export class UserForm extends EntityForm<UserFormProps, S> {
+  roleIds: string[] = [];
+  async componentDidMount() {
+    const {
+      inputItem,
+      services: { userRoleService, roleService, deptService },
+    } = this.props;
+    const deptList = deptService.store.allList.filter(dept => dept.enabled) as DeptEntity[];
+    const allRoles: CheckboxOptionType[] = roleService.store.allList
+      .filter(role => role.enabled)
+      .map(role => ({ label: role.roleName as string, value: role.id as string }));
+    const state: any = {
+      allRoles,
+      deptList,
+    };
+    if (inputItem && inputItem.id) {
+      const userRoleIds: string[] = await userRoleService
+        .list({ criteria: { eq: [['user.id', inputItem.id]] } })
+        .then(res => {
+          return res.results.map(ur => ur.role.id);
+        });
+      this.roleIds = userRoleIds;
+      state.userRoleIds = userRoleIds;
+    }
+    this.setState(state);
+  }
+
   render() {
+    if (!this.state) return null;
     const {
       form: { getFieldDecorator },
       title,
       okText,
     } = this.props;
+    const { allRoles, userRoleIds, deptList } = this.state;
     return (
       <Modal
         visible={true}
@@ -44,7 +80,7 @@ export class UserForm extends EntityForm<UserFormProps> {
               rules: [required],
             })(
               <Select>
-                {this.props.deptList.map(dept => (
+                {deptList.map(dept => (
                   <Select.Option key={dept.id} value={dept.id}>
                     {dept.name}
                   </Select.Option>
@@ -58,6 +94,9 @@ export class UserForm extends EntityForm<UserFormProps> {
               initialValue: true,
             })(<Checkbox />)}
           </Form.Item>
+          <Form.Item label="角色">
+            <Checkbox.Group options={allRoles} defaultValue={userRoleIds} onChange={this.onChangeRoles.bind(this)} />,
+          </Form.Item>
         </Form>
       </Modal>
     );
@@ -65,18 +104,22 @@ export class UserForm extends EntityForm<UserFormProps> {
 
   saveEntity(saveItem: Entity) {
     saveItem.dept = { id: saveItem.deptId };
-    saveItem.deptId = undefined;
     const { inputItem } = this.props;
     const initPassword = this.props.initPassword || INIT_PASSWORD;
     //修改时，如果密码为初始密码，不做改动
     //但同时，密码也不能改回初始密码
     if (inputItem && inputItem.id && saveItem.password === initPassword) saveItem.password = inputItem.password;
     else if (inputItem && saveItem.password !== inputItem.password) saveItem.password = sha256(saveItem.password);
-    super.saveEntity(saveItem);
+    const { userRoleService } = this.props.services;
+    return userRoleService.saveUserRoles({ ...inputItem, ...saveItem }, this.roleIds);
+  }
+
+  onChangeRoles(roleIds: CheckboxValueType[]) {
+    this.roleIds = roleIds as string[];
   }
 }
 
 export interface UserFormProps extends EntityFormProps {
-  deptList: DeptEntity[];
   initPassword?: string;
+  services: AdminServices;
 }

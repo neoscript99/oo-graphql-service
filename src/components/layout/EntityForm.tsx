@@ -20,29 +20,34 @@ export interface EntityFormProps extends FormComponentProps {
   [key: string]: any;
 }
 
-export class EntityForm<P extends EntityFormProps = EntityFormProps> extends Component<P> {
+export class EntityForm<P extends EntityFormProps = EntityFormProps, S = any> extends Component<P, S> {
   handleCancel() {
     this.props.onCancel();
   }
 
   handleOK() {
     const { form } = this.props;
-    form.validateFields((err, saveItem) => err || this.saveEntity(saveItem));
+    form.validateFields((err, saveItem) => err || this.handleSave(saveItem));
   }
 
-  saveEntity(saveItem: Entity) {
-    const { domainService, inputItem, onSuccess, onError } = this.props;
-    domainService
-      .save({ ...inputItem, ...saveItem })
+  handleSave(saveItem: Entity) {
+    const { onSuccess, onError } = this.props;
+
+    this.saveEntity(saveItem)
       .then(v => {
         message.success('保存成功');
-        this.setState({ visible: false });
         onSuccess(v);
+        return v;
       })
       .catch(reason => {
         console.error(reason);
         onError(reason);
       });
+  }
+
+  saveEntity(saveItem: Entity) {
+    const { domainService, inputItem } = this.props;
+    return domainService.save({ ...inputItem, ...saveItem });
   }
 
   static formWrapper = Form.create({

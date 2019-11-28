@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { AdminPageProps } from '../AdminServices';
 import { commonColumns, StringUtil } from '../../../utils';
 import { EntityPageList, EntityColumnProps, SimpleSearchForm, EntityFormProps } from '../../layout';
 import { DomainService, ListOptions } from '../../../DomainService';
 import { MobxDomainStore } from '../../../mobx';
-import { UserForm, UserFormProps } from './UserForm';
+import { UserForm } from './UserForm';
 import { Entity } from '../../../DomainStore';
-import { DeptEntity } from '../../../services/DeptService';
 
 const columns: EntityColumnProps[] = [
   { title: '姓名', dataIndex: 'name' },
@@ -37,10 +36,8 @@ export class UserList extends EntityPageList<AdminPageProps> {
   }
   getFormProps(action: string, item?: Entity): Partial<EntityFormProps> {
     const props = super.getFormProps(action, item);
-    (props as UserFormProps).deptList = this.props.services.deptService.store.allList.filter(
-      dept => dept.enabled,
-    ) as DeptEntity[];
-    return props;
+    const { services } = this.props;
+    return { ...props, services };
   }
   getInitItem() {
     return { editable: true };

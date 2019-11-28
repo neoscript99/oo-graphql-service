@@ -1,8 +1,17 @@
-import { AfterLogin, DeptService, MenuService, ParamService, RoleService, UserService } from '../../services/';
+import {
+  AfterLogin,
+  DeptService,
+  MenuService,
+  ParamService,
+  RoleService,
+  UserService,
+  UserRoleService,
+} from '../../services/';
 import { DomainService } from '../../DomainService';
 import { MobxDomainStore } from '../../mobx';
 import { EntityListProps } from '../layout';
 import { DomainGraphql } from '../../DomainGraphql';
+import { AbstractFetch } from '../../utils/fetch/AbstractFetch';
 
 export class AdminServices {
   userService: UserService;
@@ -11,12 +20,12 @@ export class AdminServices {
   noteService: DomainService<MobxDomainStore>;
   menuService: MenuService;
   deptService: DeptService;
-  userRoleService: DomainService<MobxDomainStore>;
+  userRoleService: UserRoleService;
 
-  constructor(domainGraphql: DomainGraphql, afterLogin: AfterLogin) {
+  constructor(domainGraphql: DomainGraphql, afterLogin: AfterLogin, fetchClient: AbstractFetch) {
     this.paramService = new ParamService(domainGraphql);
     this.noteService = new DomainService('note', MobxDomainStore, domainGraphql);
-    this.userRoleService = new DomainService('userRole', MobxDomainStore, domainGraphql);
+    this.userRoleService = new UserRoleService(domainGraphql, fetchClient);
     this.roleService = new RoleService(domainGraphql);
     this.menuService = new MenuService(domainGraphql);
     this.userService = new UserService([this.afterLogin.bind(this), afterLogin], domainGraphql);
@@ -26,6 +35,7 @@ export class AdminServices {
   afterLogin() {
     this.paramService.initDictList();
     this.deptService.initDictList();
+    this.roleService.initDictList();
     this.menuService.getMenuTree();
   }
 }

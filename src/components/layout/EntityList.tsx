@@ -190,7 +190,7 @@ export abstract class EntityList<
     this.changeSelectRows(undefined);
   }
 
-  changeSelectRows(selectedRowKeys) {
+  changeSelectRows(selectedRowKeys?: string[] | number[]) {
     this.tableProps.rowSelection.selectedRowKeys = selectedRowKeys;
     this.setState({ selectedRowKeys });
   }
@@ -259,13 +259,7 @@ export abstract class EntityList<
   }
 
   handleFormError(reason: any) {
-    const notWork = (
-      <div>
-        <h2>保存失败：</h2>
-        <blockquote>{reason}</blockquote>
-      </div>
-    );
-    message.error(`保存失败：${reason}`);
+    message.error(`处理失败：${reason}`);
   }
 
   getFormProps(action: string, item?: Entity): Partial<EntityFormProps> {
@@ -275,7 +269,7 @@ export abstract class EntityList<
       domainService: this.domainService,
       onSuccess: this.handleFormSuccess.bind(this),
       onCancel: this.handleFormCancel.bind(this),
-      onError: this.handleFormError,
+      onError: this.handleFormError.bind(this),
       columns: this.columns,
       inputItem: item || this.getInitItem(),
     };
