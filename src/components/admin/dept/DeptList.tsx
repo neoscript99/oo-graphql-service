@@ -42,5 +42,5 @@ export class DeptList extends EntityList<AdminPageProps> {
 }
 
 export class DeptSearchForm extends SimpleSearchForm {
-  placeholder = '名称、帐号';
+  placeholder = '机构名';
 }

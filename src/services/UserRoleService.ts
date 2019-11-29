@@ -12,6 +12,6 @@ export class UserRoleService extends DomainService<MobxDomainStore> {
   }
 
   saveUserRoles(user: Entity, roleIds: string[]) {
-    return this.fetchClient.post('/api/users/withRoles', { user, roleIds });
+    return this.fetchClient.post('/user/saveWithRoles', { user, roleIds });
   }
 }
