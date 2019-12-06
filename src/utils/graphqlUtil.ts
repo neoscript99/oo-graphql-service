@@ -101,7 +101,9 @@ export function pureGraphqlObject(obj: any): any {
   obj.__typename = undefined;
   obj.lastUpdated = undefined;
   obj.dateCreated = undefined;
-  Object.values(obj).forEach(value => isObject(value) && pureGraphqlObject(value));
+  for (const key in obj) {
+    isObject(obj[key]) && pureGraphqlObject(obj[key]);
+  }
   return obj;
 }
 
