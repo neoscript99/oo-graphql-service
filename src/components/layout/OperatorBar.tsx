@@ -25,7 +25,7 @@ export class OperatorBar extends Component<OperatorBarProps> {
             新增
           </Button>
         )}
-        {operatorVisible.create && (
+        {operatorVisible.update && (
           <Button type="primary" disabled={!operatorEnable.update} icon="edit" style={buttonCss} onClick={onUpdate}>
             修改
           </Button>
